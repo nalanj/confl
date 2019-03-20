@@ -42,7 +42,9 @@ escaped quotation marks prefixed by `\`, and a `\` can be escaped by another
 
 A word is a series of characters that does not start with a number and that
 does not contain any spaces or quotation marks. Words are effectively short
-strings that don't contain any spaces. Words are useful as identifiers.
+strings that aren't surrounded by quotes, and are useful as identifiers.
+
+Words cannot contain `"`, `'`, `=`, `,`, or any sort of whitespace.
 
 ```
 word
@@ -91,4 +93,27 @@ of the line.
 # Multiline comments are just
 # multiple lines beginning with a pound
 # sign
+```
+
+### Decorators
+
+Decorators decorate other types to help them communicate more complex ideas. A
+decorator is communicated as a word with a pair of attached parenthesis.
+
+```
+decorator(12)
+```
+
+A decorator can contain any other type.
+
+Lists in a decorator can include or exclude the surrounding brackets.
+
+```
+list_decorator(test, 12)
+```
+
+Maps in a decorator can exclude the surrounded braces:
+
+```
+map_decorator(foo=bar blah=baz)
 ```
