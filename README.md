@@ -3,6 +3,24 @@
 Confl is a simple configuration language. It's related to things like YAML,
 JSON, and TOML.
 
+## Example Document
+
+Here's an example that shows most of the features of confl.
+
+```
+# Simple wifi configuration
+device(wifi0)={
+  network="Pretty fly for a wifi"
+  key="Some long wpa key"
+  dhcp=true
+
+  dns=[10.0.0.1, 10.0.0.2]
+  gateway=10.0.0.1
+
+  vpn={host=12.12.12.12 user=frank pass=secret key=path(/etc/vpn.key)}
+}
+```
+
 ## The Tokens
 
 ### Numbers
@@ -49,6 +67,18 @@ Words cannot contain `"`, `'`, `=`, `,`, or any sort of whitespace.
 ```
 word
 a_word
+```
+
+Confl doesn't include an explicit boolean type because words can represent
+booleans:
+
+```
+true
+false
+TRUE
+FALSE
+yes
+no
 ```
 
 ### Maps
@@ -112,7 +142,7 @@ Lists in a decorator can include or exclude the surrounding brackets.
 list_decorator(test, 12)
 ```
 
-Maps in a decorator can exclude the surrounded braces:
+Maps in a decorator can exclude the surrounded braces as well:
 
 ```
 map_decorator(foo=bar blah=baz)
