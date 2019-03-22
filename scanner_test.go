@@ -49,6 +49,12 @@ func TestScan(t *testing.T) {
 			[]Token{MapStart, Word, MapKVDelim, Number, MapEnd, EOF},
 			[]string{"", "word", "", "12", "", ""},
 		},
+		{
+			"spacey map",
+			[]byte("  {  word = 12\t}"),
+			[]Token{MapStart, Word, MapKVDelim, Number, MapEnd, EOF},
+			[]string{"", "word", "", "12", "", ""},
+		},
 	}
 
 	for _, test := range tests {
