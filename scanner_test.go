@@ -14,12 +14,6 @@ func TestScan(t *testing.T) {
 		values   []string
 	}{
 		{
-			"explicit empty map",
-			[]byte("{}"),
-			[]Token{MapStart, MapEnd, EOF},
-			[]string{"", "", ""},
-		},
-		{
 			"simple integer number",
 			[]byte("12"),
 			[]Token{Number, EOF},
@@ -42,6 +36,18 @@ func TestScan(t *testing.T) {
 			[]byte(" testing "),
 			[]Token{Word, EOF},
 			[]string{"testing", ""},
+		},
+		{
+			"empty map",
+			[]byte("{}"),
+			[]Token{MapStart, MapEnd, EOF},
+			[]string{"", "", ""},
+		},
+		{
+			"map",
+			[]byte("{word=12}"),
+			[]Token{MapStart, Word, MapKVDelim, Number, MapEnd, EOF},
+			[]string{"", "word", "", "12", "", ""},
 		},
 	}
 

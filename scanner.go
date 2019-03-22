@@ -68,32 +68,49 @@ func Init(src []byte) *Scanner {
 
 // Token returns the next token, offset, and string content
 func (s *Scanner) Token() (Token, int, string) {
-	if !s.next() {
-		return Illegal, s.offset, ""
+	var token Token
+	var content string
+
+	// advance to the first character if at the beginning of the source
+	if s.offset == 0 && !s.next() {
+		return Illegal, 0, ""
 	}
 
 	// TODO: handle BOM if at 0
 
 	s.skipWhitespace()
 
+	offset := s.offset
+	advance := false
+
 	switch {
 	case s.ch == runeEOF:
-		return EOF, s.offset, ""
+		token = EOF
 	case s.isDigit():
-		offset := s.offset
-		token, numStr := s.scanNumber()
-		return token, offset, numStr
+		token, content = s.scanNumber()
 	case s.isLetter():
-		offset := s.offset
-		token, wordStr := s.scanWord()
-		return token, offset, wordStr
+		token, content = s.scanWord()
 	case s.ch == '{':
-		return MapStart, s.offset, ""
+		token = MapStart
+		advance = true
 	case s.ch == '}':
-		return MapEnd, s.offset, ""
+		token = MapEnd
+		advance = true
+	case s.ch == '=':
+		token = MapKVDelim
+		advance = true
 	default:
-		return Illegal, s.offset, ""
+		token = Illegal
 	}
+
+	if advance {
+		if !s.next() {
+			token = Illegal
+			content = string(s.src[offset:s.nextOffset])
+		}
+	}
+
+	return token, offset, content
 }
 
 // isWhitespace returns whether the current ch is whitespace

@@ -21,4 +21,7 @@ const (
 
 	// MapEnd represents the end of a map token
 	MapEnd
+
+	// MapKVDelim represents a key value delimiter
+	MapKVDelim
 )
