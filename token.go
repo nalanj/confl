@@ -13,6 +13,9 @@ const (
 	// Number represents a number token
 	Number
 
+	// Word represents a word token
+	Word
+
 	// MapStart represents the start of a map token
 	MapStart
 

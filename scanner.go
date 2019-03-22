@@ -2,6 +2,7 @@ package confl
 
 import (
 	"errors"
+	"unicode"
 	"unicode/utf8"
 )
 
@@ -78,10 +79,14 @@ func (s *Scanner) Token() (Token, int, string) {
 	switch {
 	case s.ch == runeEOF:
 		return EOF, s.offset, ""
-	case s.ch >= '0' && s.ch <= '9':
+	case s.isDigit():
 		offset := s.offset
 		token, numStr := s.scanNumber()
 		return token, offset, numStr
+	case s.isLetter():
+		offset := s.offset
+		token, wordStr := s.scanWord()
+		return token, offset, wordStr
 	case s.ch == '{':
 		return MapStart, s.offset, ""
 	case s.ch == '}':
@@ -107,6 +112,16 @@ func (s *Scanner) isPunctuation() bool {
 	return false
 }
 
+// isDigit returns if the current ch is a digit
+func (s *Scanner) isDigit() bool {
+	return s.ch >= '0' && s.ch <= '9' || s.ch > utf8.RuneSelf && unicode.IsDigit(s.ch)
+}
+
+// isLetter returns if the current ch is a letter
+func (s *Scanner) isLetter() bool {
+	return s.ch >= 'a' && s.ch <= 'z' || s.ch >= 'A' && s.ch <= 'Z' || s.ch > utf8.RuneSelf && unicode.IsLetter(s.ch)
+}
+
 // skipWhitespace reads through whitespace
 func (s *Scanner) skipWhitespace() {
 	for s.isWhitespace() {
@@ -120,7 +135,7 @@ func (s *Scanner) scanNumber() (Token, string) {
 	seenDecimal := false
 
 	for !s.isPunctuation() && !s.isWhitespace() {
-		if (s.ch <= '0' || s.ch >= '9') && s.ch != '.' {
+		if !s.isDigit() && s.ch != '.' {
 			return Illegal, string(s.src[startOff:s.nextOffset])
 		}
 
@@ -137,5 +152,22 @@ func (s *Scanner) scanNumber() (Token, string) {
 		}
 	}
 
-	return Number, string(s.src[startOff:s.nextOffset])
+	return Number, string(s.src[startOff:s.offset])
+}
+
+// scanWord scans a word
+func (s *Scanner) scanWord() (Token, string) {
+	startOff := s.offset
+
+	for !s.isPunctuation() && !s.isWhitespace() {
+		if !s.isLetter() {
+			return Illegal, string(s.src[startOff:s.nextOffset])
+		}
+
+		if !s.next() {
+			return Illegal, string(s.src[startOff:s.nextOffset])
+		}
+	}
+
+	return Word, string(s.src[startOff:s.offset])
 }

@@ -37,6 +37,12 @@ func TestScan(t *testing.T) {
 			[]Token{Illegal},
 			[]string{"1.2."},
 		},
+		{
+			"word",
+			[]byte(" testing "),
+			[]Token{Word, EOF},
+			[]string{"testing", ""},
+		},
 	}
 
 	for _, test := range tests {
