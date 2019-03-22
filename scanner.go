@@ -114,6 +114,7 @@ func (s *Scanner) skipWhitespace() {
 	}
 }
 
+// scanNumber scans numbers
 func (s *Scanner) scanNumber() (Token, string) {
 	startOff := s.offset
 	seenDecimal := false
