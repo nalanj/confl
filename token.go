@@ -24,4 +24,10 @@ const (
 
 	// MapKVDelim represents a key value delimiter
 	MapKVDelim
+
+	// ListStart represents the start of a list
+	ListStart
+
+	// ListEnd represents the end of a list
+	ListEnd
 )

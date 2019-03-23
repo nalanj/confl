@@ -55,6 +55,18 @@ func TestScan(t *testing.T) {
 			[]Token{MapStart, Word, MapKVDelim, Number, MapEnd, EOF},
 			[]string{"", "word", "", "12", "", ""},
 		},
+		{
+			"empty list",
+			[]byte("[]"),
+			[]Token{ListStart, ListEnd, EOF},
+			[]string{"", "", ""},
+		},
+		{
+			"list with a couple of items",
+			[]byte("[word 1.2]"),
+			[]Token{ListStart, Word, Number, ListEnd, EOF},
+			[]string{"", "word", "1.2", "", ""},
+		},
 	}
 
 	for _, test := range tests {

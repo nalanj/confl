@@ -99,6 +99,12 @@ func (s *Scanner) Token() (Token, int, string) {
 	case s.ch == '=':
 		token = MapKVDelim
 		advance = true
+	case s.ch == '[':
+		token = ListStart
+		advance = true
+	case s.ch == ']':
+		token = ListEnd
+		advance = true
 	default:
 		token = Illegal
 	}

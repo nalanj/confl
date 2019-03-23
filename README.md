@@ -14,7 +14,7 @@ device(wifi0)={
   key="Some long wpa key"
   dhcp=true
 
-  dns=[10.0.0.1, 10.0.0.2]
+  dns=[10.0.0.1 10.0.0.2]
   gateway=10.0.0.1
 
   vpn={host=12.12.12.12 user=frank pass=secret key=path(/etc/vpn.key)}
@@ -107,9 +107,10 @@ excluded in that case.
 ### Lists
 
 A list is an ordered series of values. Lists are surrounded by square brackets.
+Lists are space delimited.
 
 ```
-[this, is, "a", list, of, 7, "items"]
+[this is "a" list of 7 "items"]
 ```
 
 ### Comments
