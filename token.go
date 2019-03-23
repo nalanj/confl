@@ -22,12 +22,15 @@ const (
 	// MapEnd represents the end of a map token
 	MapEnd
 
-	// MapKVDelim represents a key value delimiter
+	// MapKVDelim represents a key value delimiter token
 	MapKVDelim
 
-	// ListStart represents the start of a list
+	// ListStart represents the start of a list token
 	ListStart
 
-	// ListEnd represents the end of a list
+	// ListEnd represents the end of a list token
 	ListEnd
+
+	// Comment represents a comment token
+	Comment
 )

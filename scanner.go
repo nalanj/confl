@@ -105,6 +105,8 @@ func (s *Scanner) Token() (Token, int, string) {
 	case s.ch == ']':
 		token = ListEnd
 		advance = true
+	case s.ch == '#':
+		token, content = s.scanComment()
 	default:
 		token = Illegal
 	}
@@ -193,4 +195,17 @@ func (s *Scanner) scanWord() (Token, string) {
 	}
 
 	return Word, string(s.src[startOff:s.offset])
+}
+
+// scanComment scans a comment
+func (s *Scanner) scanComment() (Token, string) {
+	startOff := s.offset
+
+	for s.ch != '\n' {
+		if !s.next() {
+			return Illegal, string(s.src[startOff:s.nextOffset])
+		}
+	}
+
+	return Comment, string(s.src[startOff:s.offset])
 }

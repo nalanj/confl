@@ -67,6 +67,12 @@ func TestScan(t *testing.T) {
 			[]Token{ListStart, Word, Number, ListEnd, EOF},
 			[]string{"", "word", "1.2", "", ""},
 		},
+		{
+			"comment",
+			[]byte("word # comment\nword"),
+			[]Token{Word, Comment, Word, EOF},
+			[]string{"word", "# comment", "word", ""},
+		},
 	}
 
 	for _, test := range tests {
