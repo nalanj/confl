@@ -107,6 +107,8 @@ func (s *Scanner) Token() (Token, int, string) {
 		advance = true
 	case s.ch == '#':
 		token, content = s.scanComment()
+	case s.isStringDelim():
+		token, content = s.scanString()
 	default:
 		token = Illegal
 	}
@@ -145,6 +147,11 @@ func (s *Scanner) isDigit() bool {
 // isLetter returns if the current ch is a letter
 func (s *Scanner) isLetter() bool {
 	return s.ch >= 'a' && s.ch <= 'z' || s.ch >= 'A' && s.ch <= 'Z' || s.ch > utf8.RuneSelf && unicode.IsLetter(s.ch)
+}
+
+// isStringDelim returns true if the character is a string delimiter
+func (s *Scanner) isStringDelim() bool {
+	return s.ch == '"' || s.ch == '\''
 }
 
 // skipWhitespace reads through whitespace
@@ -208,4 +215,31 @@ func (s *Scanner) scanComment() (Token, string) {
 	}
 
 	return Comment, string(s.src[startOff:s.offset])
+}
+
+// scanString scans a string. Should be called on a string opening char
+func (s *Scanner) scanString() (Token, string) {
+	delim := s.ch
+	startOff := s.offset
+
+	// skip the opening char
+	if !s.next() {
+		return Illegal, string(s.src[startOff:s.nextOffset])
+	}
+	startOff++
+
+	for s.ch != delim {
+		if !s.next() {
+			return Illegal, string(s.src[startOff:s.nextOffset])
+		}
+	}
+
+	content := string(s.src[startOff:s.offset])
+
+	// skip the ending char
+	if !s.next() {
+		return Illegal, string(s.src[startOff:s.nextOffset])
+	}
+
+	return String, content
 }

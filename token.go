@@ -33,4 +33,7 @@ const (
 
 	// Comment represents a comment token
 	Comment
+
+	// String represents a string token
+	String
 )

@@ -73,6 +73,18 @@ func TestScan(t *testing.T) {
 			[]Token{Word, Comment, Word, EOF},
 			[]string{"word", "# comment", "word", ""},
 		},
+		{
+			"simple string with double quote",
+			[]byte("\"a string\""),
+			[]Token{String, EOF},
+			[]string{"a string", ""},
+		},
+		{
+			"simple string with single quote",
+			[]byte("'a string'"),
+			[]Token{String, EOF},
+			[]string{"a string", ""},
+		},
 	}
 
 	for _, test := range tests {
