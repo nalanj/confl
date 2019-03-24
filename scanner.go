@@ -197,10 +197,6 @@ func (s *Scanner) scanWord() (Token, string) {
 	startOff := s.offset
 
 	for !s.isPunctuation() && !s.isWhitespace() {
-		if !s.isLetter() {
-			return Illegal, string(s.src[startOff:s.nextOffset])
-		}
-
 		if !s.next() {
 			return Illegal, string(s.src[startOff:s.nextOffset])
 		}
