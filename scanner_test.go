@@ -85,6 +85,18 @@ func TestScan(t *testing.T) {
 			[]Token{String, EOF},
 			[]string{"a string", ""},
 		},
+		{
+			"string with escaped inner double quote",
+			[]byte("\"a \\\" string\""),
+			[]Token{String, EOF},
+			[]string{"a \" string", ""},
+		},
+		{
+			"string with escaped inner single quote",
+			[]byte("'a \\' string'"),
+			[]Token{String, EOF},
+			[]string{"a ' string", ""},
+		},
 	}
 
 	for _, test := range tests {

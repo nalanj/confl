@@ -221,6 +221,8 @@ func (s *Scanner) scanComment() (Token, string) {
 func (s *Scanner) scanString() (Token, string) {
 	delim := s.ch
 	startOff := s.offset
+	var content []byte
+	escape := false
 
 	// skip the opening char
 	if !s.next() {
@@ -228,18 +230,36 @@ func (s *Scanner) scanString() (Token, string) {
 	}
 	startOff++
 
-	for s.ch != delim {
+	for {
+		if s.ch == '\\' {
+			if escape {
+				escape = false
+			} else {
+				escape = true
+			}
+		}
+
+		if s.ch == delim {
+			if escape {
+				escape = false
+			} else {
+				break
+			}
+		}
+
+		if !escape {
+			content = append(content, s.src[s.offset:s.nextOffset]...)
+		}
+
 		if !s.next() {
 			return Illegal, string(s.src[startOff:s.nextOffset])
 		}
 	}
-
-	content := string(s.src[startOff:s.offset])
 
 	// skip the ending char
 	if !s.next() {
 		return Illegal, string(s.src[startOff:s.nextOffset])
 	}
 
-	return String, content
+	return String, string(content)
 }
