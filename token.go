@@ -36,4 +36,10 @@ const (
 
 	// String represents a string token
 	String
+
+	// DecoratorStart represents the start of a decorator
+	DecoratorStart
+
+	// DecoratorEnd represents the end of a decorator
+	DecoratorEnd
 )

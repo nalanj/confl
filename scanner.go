@@ -90,6 +90,9 @@ func (s *Scanner) Token() (Token, int, string) {
 		token, content = s.scanNumber()
 	case s.isLetter():
 		token, content = s.scanWord()
+	case s.ch == ')':
+		token = DecoratorEnd
+		advance = true
 	case s.ch == '{':
 		token = MapStart
 		advance = true
@@ -133,7 +136,9 @@ func (s *Scanner) isWhitespace() bool {
 
 // isPunctuation notes if the current ch is one of the punctuation chars
 func (s *Scanner) isPunctuation() bool {
-	if s.ch == '{' || s.ch == '}' || s.ch == '[' || s.ch == ']' || s.ch == '=' || s.ch == runeEOF {
+	if s.ch == '{' || s.ch == '}' || s.ch == '[' || s.ch == ']' || s.ch == '=' ||
+		s.ch == '(' || s.ch == ')' || s.ch == runeEOF {
+
 		return true
 	}
 	return false
@@ -187,7 +192,7 @@ func (s *Scanner) scanNumber() (Token, string) {
 	return Number, string(s.src[startOff:s.offset])
 }
 
-// scanWord scans a word
+// scanWord scans a word or a decorator
 func (s *Scanner) scanWord() (Token, string) {
 	startOff := s.offset
 
@@ -201,7 +206,17 @@ func (s *Scanner) scanWord() (Token, string) {
 		}
 	}
 
-	return Word, string(s.src[startOff:s.offset])
+	content := string(s.src[startOff:s.offset])
+
+	// if we're on a (, this is a decorator and not a word
+	if s.ch == '(' {
+		if !s.next() {
+			return Illegal, string(s.src[startOff:s.nextOffset])
+		}
+		return DecoratorStart, content
+	}
+
+	return Word, content
 }
 
 // scanComment scans a comment

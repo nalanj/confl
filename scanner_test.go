@@ -103,6 +103,12 @@ func TestScan(t *testing.T) {
 			[]Token{String, EOF},
 			[]string{"a \nstring", ""},
 		},
+		{
+			"simple decorator",
+			[]byte("decorator(12)"),
+			[]Token{DecoratorStart, Number, DecoratorEnd, EOF},
+			[]string{"decorator", "12", "", ""},
+		},
 	}
 
 	for _, test := range tests {
