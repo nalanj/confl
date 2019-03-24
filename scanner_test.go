@@ -97,6 +97,12 @@ func TestScan(t *testing.T) {
 			[]Token{String, EOF},
 			[]string{"a ' string", ""},
 		},
+		{
+			"string with line breaks",
+			[]byte("'a \nstring'"),
+			[]Token{String, EOF},
+			[]string{"a \nstring", ""},
+		},
 	}
 
 	for _, test := range tests {
