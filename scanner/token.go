@@ -1,11 +1,11 @@
-package confl
+package scanner
 
-// Token represents a token from a Confl file
-type Token uint
+// TokenType represents the various types of tokens
+type TokenType uint
 
 const (
 	// Illegal represents an illegal token
-	Illegal Token = iota
+	Illegal TokenType = iota
 
 	// EOF represents a token for the end of the file
 	EOF
@@ -43,3 +43,16 @@ const (
 	// DecoratorEnd represents the end of a decorator
 	DecoratorEnd
 )
+
+// Token is a token from the scanner
+type Token struct {
+
+	// Type of the token
+	Type TokenType
+
+	// Offset of the token in the source
+	Offset int
+
+	// Content of the token
+	Content string
+}

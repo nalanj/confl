@@ -1,4 +1,4 @@
-package confl
+package scanner
 
 import (
 	"errors"
@@ -11,8 +11,8 @@ const (
 	runeBOM rune = 0xFEFF
 )
 
-// Scanner is a scanner of Confl code
-type Scanner struct {
+// SrcScanner is a scanner of Confl code
+type SrcScanner struct {
 
 	// offset within the document
 	offset int
@@ -31,7 +31,7 @@ type Scanner struct {
 }
 
 // next returns the next character from the scanner
-func (s *Scanner) next() bool {
+func (s *SrcScanner) next() bool {
 	if s.nextOffset < len(s.src) {
 		s.offset = s.nextOffset
 
@@ -62,18 +62,18 @@ func (s *Scanner) next() bool {
 }
 
 // Init returns a new scanner based on the given source
-func Init(src []byte) *Scanner {
-	return &Scanner{src: src}
+func Init(src []byte) *SrcScanner {
+	return &SrcScanner{src: src}
 }
 
 // Token returns the next token, offset, and string content
-func (s *Scanner) Token() (Token, int, string) {
+func (s *SrcScanner) Token() Token {
 	var token Token
-	var content string
 
 	// advance to the first character if at the beginning of the source
 	if s.offset == 0 && !s.next() {
-		return Illegal, 0, ""
+		token.Type = Illegal
+		return token
 	}
 
 	// TODO: handle BOM if at 0
@@ -85,49 +85,49 @@ func (s *Scanner) Token() (Token, int, string) {
 
 	switch {
 	case s.ch == runeEOF:
-		token = EOF
+		token.Type = EOF
 	case s.isDigit():
-		token, content = s.scanNumber()
+		token.Type, token.Content = s.scanNumber()
 	case s.isLetter():
-		token, content = s.scanWord()
+		token.Type, token.Content = s.scanWord()
 	case s.ch == ')':
-		token = DecoratorEnd
+		token.Type = DecoratorEnd
 		advance = true
 	case s.ch == '{':
-		token = MapStart
+		token.Type = MapStart
 		advance = true
 	case s.ch == '}':
-		token = MapEnd
+		token.Type = MapEnd
 		advance = true
 	case s.ch == '=':
-		token = MapKVDelim
+		token.Type = MapKVDelim
 		advance = true
 	case s.ch == '[':
-		token = ListStart
+		token.Type = ListStart
 		advance = true
 	case s.ch == ']':
-		token = ListEnd
+		token.Type = ListEnd
 		advance = true
 	case s.ch == '#':
-		token, content = s.scanComment()
+		token.Type, token.Content = s.scanComment()
 	case s.isStringDelim():
-		token, content = s.scanString()
+		token.Type, token.Content = s.scanString()
 	default:
-		token = Illegal
+		token.Type = Illegal
 	}
 
 	if advance {
 		if !s.next() {
-			token = Illegal
-			content = string(s.src[offset:s.nextOffset])
+			token.Type = Illegal
+			token.Content = string(s.src[offset:s.nextOffset])
 		}
 	}
 
-	return token, offset, content
+	return token
 }
 
 // isWhitespace returns whether the current ch is whitespace
-func (s *Scanner) isWhitespace() bool {
+func (s *SrcScanner) isWhitespace() bool {
 	if s.ch == ' ' || s.ch == '\r' || s.ch == '\n' || s.ch == '\t' {
 		return true
 	}
@@ -135,7 +135,7 @@ func (s *Scanner) isWhitespace() bool {
 }
 
 // isPunctuation notes if the current ch is one of the punctuation chars
-func (s *Scanner) isPunctuation() bool {
+func (s *SrcScanner) isPunctuation() bool {
 	if s.ch == '{' || s.ch == '}' || s.ch == '[' || s.ch == ']' || s.ch == '=' ||
 		s.ch == '(' || s.ch == ')' || s.ch == runeEOF {
 
@@ -145,29 +145,29 @@ func (s *Scanner) isPunctuation() bool {
 }
 
 // isDigit returns if the current ch is a digit
-func (s *Scanner) isDigit() bool {
+func (s *SrcScanner) isDigit() bool {
 	return s.ch >= '0' && s.ch <= '9' || s.ch > utf8.RuneSelf && unicode.IsDigit(s.ch)
 }
 
 // isLetter returns if the current ch is a letter
-func (s *Scanner) isLetter() bool {
+func (s *SrcScanner) isLetter() bool {
 	return s.ch >= 'a' && s.ch <= 'z' || s.ch >= 'A' && s.ch <= 'Z' || s.ch > utf8.RuneSelf && unicode.IsLetter(s.ch)
 }
 
 // isStringDelim returns true if the character is a string delimiter
-func (s *Scanner) isStringDelim() bool {
+func (s *SrcScanner) isStringDelim() bool {
 	return s.ch == '"' || s.ch == '\''
 }
 
 // skipWhitespace reads through whitespace
-func (s *Scanner) skipWhitespace() {
+func (s *SrcScanner) skipWhitespace() {
 	for s.isWhitespace() {
 		s.next()
 	}
 }
 
 // scanNumber scans numbers
-func (s *Scanner) scanNumber() (Token, string) {
+func (s *SrcScanner) scanNumber() (TokenType, string) {
 	startOff := s.offset
 	seenDecimal := false
 
@@ -193,7 +193,7 @@ func (s *Scanner) scanNumber() (Token, string) {
 }
 
 // scanWord scans a word or a decorator
-func (s *Scanner) scanWord() (Token, string) {
+func (s *SrcScanner) scanWord() (TokenType, string) {
 	startOff := s.offset
 
 	for !s.isPunctuation() && !s.isWhitespace() {
@@ -216,7 +216,7 @@ func (s *Scanner) scanWord() (Token, string) {
 }
 
 // scanComment scans a comment
-func (s *Scanner) scanComment() (Token, string) {
+func (s *SrcScanner) scanComment() (TokenType, string) {
 	startOff := s.offset
 
 	for s.ch != '\n' {
@@ -229,7 +229,7 @@ func (s *Scanner) scanComment() (Token, string) {
 }
 
 // scanString scans a string. Should be called on a string opening char
-func (s *Scanner) scanString() (Token, string) {
+func (s *SrcScanner) scanString() (TokenType, string) {
 	delim := s.ch
 	startOff := s.offset
 	var content []byte
