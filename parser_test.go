@@ -27,7 +27,7 @@ func TestParser(t *testing.T) {
 	}{
 
 		{
-			"simple document",
+			"implicit document map",
 			[]Token{
 				Token{Type: WordToken, Content: "test"},
 				Token{Type: MapKVDelimToken},
