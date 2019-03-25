@@ -1,4 +1,4 @@
-package scanner
+package confl
 
 import (
 	"testing"
@@ -16,97 +16,111 @@ func TestScan(t *testing.T) {
 		{
 			"simple integer number",
 			[]byte("12"),
-			[]TokenType{Number, EOF},
+			[]TokenType{NumberToken, EOFToken},
 			[]string{"12", ""},
 		},
 		{
 			"simple decimal number",
 			[]byte("12.3"),
-			[]TokenType{Number, EOF},
+			[]TokenType{NumberToken, EOFToken},
 			[]string{"12.3", ""},
 		},
 		{
 			"illegal: two decimal number",
 			[]byte("1.2.3"),
-			[]TokenType{Illegal},
+			[]TokenType{IllegalToken},
 			[]string{"1.2."},
 		},
 		{
 			"word",
 			[]byte(" testing "),
-			[]TokenType{Word, EOF},
+			[]TokenType{WordToken, EOFToken},
 			[]string{"testing", ""},
 		},
 		{
 			"empty map",
 			[]byte("{}"),
-			[]TokenType{MapStart, MapEnd, EOF},
+			[]TokenType{MapStartToken, MapEndToken, EOFToken},
 			[]string{"", "", ""},
 		},
 		{
 			"map",
 			[]byte("{word=12}"),
-			[]TokenType{MapStart, Word, MapKVDelim, Number, MapEnd, EOF},
+			[]TokenType{
+				MapStartToken,
+				WordToken, MapKVDelimToken, NumberToken,
+				MapEndToken, EOFToken,
+			},
 			[]string{"", "word", "", "12", "", ""},
 		},
 		{
 			"spacey map",
 			[]byte("  {  word = 12\t}"),
-			[]TokenType{MapStart, Word, MapKVDelim, Number, MapEnd, EOF},
+			[]TokenType{
+				MapStartToken,
+				WordToken, MapKVDelimToken, NumberToken,
+				MapEndToken, EOFToken,
+			},
 			[]string{"", "word", "", "12", "", ""},
 		},
 		{
 			"empty list",
 			[]byte("[]"),
-			[]TokenType{ListStart, ListEnd, EOF},
+			[]TokenType{ListStartToken, ListEndToken, EOFToken},
 			[]string{"", "", ""},
 		},
 		{
 			"list with a couple of items",
 			[]byte("[word 1.2]"),
-			[]TokenType{ListStart, Word, Number, ListEnd, EOF},
+			[]TokenType{
+				ListStartToken,
+				WordToken, NumberToken,
+				ListEndToken, EOFToken,
+			},
 			[]string{"", "word", "1.2", "", ""},
 		},
 		{
 			"comment",
 			[]byte("word # comment\nword"),
-			[]TokenType{Word, Comment, Word, EOF},
+			[]TokenType{
+				WordToken, CommentToken, WordToken, EOFToken,
+			},
 			[]string{"word", "# comment", "word", ""},
 		},
 		{
 			"simple string with double quote",
 			[]byte("\"a string\""),
-			[]TokenType{String, EOF},
+			[]TokenType{StringToken, EOFToken},
 			[]string{"a string", ""},
 		},
 		{
 			"simple string with single quote",
 			[]byte("'a string'"),
-			[]TokenType{String, EOF},
+			[]TokenType{StringToken, EOFToken},
 			[]string{"a string", ""},
 		},
 		{
 			"string with escaped inner double quote",
 			[]byte("\"a \\\" string\""),
-			[]TokenType{String, EOF},
+			[]TokenType{StringToken, EOFToken},
 			[]string{"a \" string", ""},
 		},
 		{
 			"string with escaped inner single quote",
 			[]byte("'a \\' string'"),
-			[]TokenType{String, EOF},
+			[]TokenType{StringToken, EOFToken},
 			[]string{"a ' string", ""},
 		},
 		{
 			"string with line breaks",
 			[]byte("'a \nstring'"),
-			[]TokenType{String, EOF},
+			[]TokenType{StringToken, EOFToken},
 			[]string{"a \nstring", ""},
 		},
 		{
 			"simple decorator",
 			[]byte("decorator(12)"),
-			[]TokenType{DecoratorStart, Number, DecoratorEnd, EOF},
+			[]TokenType{DecoratorStartToken, NumberToken, DecoratorEndToken, EOFToken},
 			[]string{"decorator", "12", "", ""},
 		},
 		{
@@ -125,21 +139,21 @@ func TestScan(t *testing.T) {
 			}	
 			`),
 			[]TokenType{
-				Comment,
-				DecoratorStart, Word, DecoratorEnd, MapKVDelim, MapStart,
-				Word, MapKVDelim, String,
-				Word, MapKVDelim, String,
-				Word, MapKVDelim, Word,
-				Word, MapKVDelim, ListStart, String, String, ListEnd,
-				Word, MapKVDelim, String,
-				Word, MapKVDelim,
-				MapStart,
-				Word, MapKVDelim, String,
-				Word, MapKVDelim, Word,
-				Word, MapKVDelim, Word,
-				Word, MapKVDelim, DecoratorStart, String, DecoratorEnd,
-				MapEnd,
-				MapEnd, EOF,
+				CommentToken,
+				DecoratorStartToken, WordToken, DecoratorEndToken, MapKVDelimToken, MapStartToken,
+				WordToken, MapKVDelimToken, StringToken,
+				WordToken, MapKVDelimToken, StringToken,
+				WordToken, MapKVDelimToken, WordToken,
+				WordToken, MapKVDelimToken, ListStartToken, StringToken, StringToken, ListEndToken,
+				WordToken, MapKVDelimToken, StringToken,
+				WordToken, MapKVDelimToken,
+				MapStartToken,
+				WordToken, MapKVDelimToken, StringToken,
+				WordToken, MapKVDelimToken, WordToken,
+				WordToken, MapKVDelimToken, WordToken,
+				WordToken, MapKVDelimToken, DecoratorStartToken, StringToken, DecoratorEndToken,
+				MapEndToken,
+				MapEndToken, EOFToken,
 			},
 			[]string{
 				"# Simple wifi configuration",
@@ -174,7 +188,7 @@ func TestScan(t *testing.T) {
 				tokens = append(tokens, token.Type)
 				contents = append(contents, token.Content)
 
-				if token.Type == Illegal || token.Type == EOF {
+				if token.Type == IllegalToken || token.Type == EOFToken {
 					break
 				}
 			}

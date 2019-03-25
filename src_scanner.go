@@ -1,4 +1,4 @@
-package scanner
+package confl
 
 import (
 	"errors"
@@ -72,7 +72,7 @@ func (s *SrcScanner) Token() Token {
 
 	// advance to the first character if at the beginning of the source
 	if s.offset == 0 && !s.next() {
-		token.Type = Illegal
+		token.Type = IllegalToken
 		return token
 	}
 
@@ -85,40 +85,40 @@ func (s *SrcScanner) Token() Token {
 
 	switch {
 	case s.ch == runeEOF:
-		token.Type = EOF
+		token.Type = EOFToken
 	case s.isDigit():
 		token.Type, token.Content = s.scanNumber()
 	case s.isLetter():
 		token.Type, token.Content = s.scanWord()
 	case s.ch == ')':
-		token.Type = DecoratorEnd
+		token.Type = DecoratorEndToken
 		advance = true
 	case s.ch == '{':
-		token.Type = MapStart
+		token.Type = MapStartToken
 		advance = true
 	case s.ch == '}':
-		token.Type = MapEnd
+		token.Type = MapEndToken
 		advance = true
 	case s.ch == '=':
-		token.Type = MapKVDelim
+		token.Type = MapKVDelimToken
 		advance = true
 	case s.ch == '[':
-		token.Type = ListStart
+		token.Type = ListStartToken
 		advance = true
 	case s.ch == ']':
-		token.Type = ListEnd
+		token.Type = ListEndToken
 		advance = true
 	case s.ch == '#':
 		token.Type, token.Content = s.scanComment()
 	case s.isStringDelim():
 		token.Type, token.Content = s.scanString()
 	default:
-		token.Type = Illegal
+		token.Type = IllegalToken
 	}
 
 	if advance {
 		if !s.next() {
-			token.Type = Illegal
+			token.Type = IllegalToken
 			token.Content = string(s.src[offset:s.nextOffset])
 		}
 	}
@@ -173,23 +173,23 @@ func (s *SrcScanner) scanNumber() (TokenType, string) {
 
 	for !s.isPunctuation() && !s.isWhitespace() {
 		if !s.isDigit() && s.ch != '.' {
-			return Illegal, string(s.src[startOff:s.nextOffset])
+			return IllegalToken, string(s.src[startOff:s.nextOffset])
 		}
 
 		if s.ch == '.' {
 			if seenDecimal {
-				return Illegal, string(s.src[startOff:s.nextOffset])
+				return IllegalToken, string(s.src[startOff:s.nextOffset])
 			}
 
 			seenDecimal = true
 		}
 
 		if !s.next() {
-			return Illegal, string(s.src[startOff:s.nextOffset])
+			return IllegalToken, string(s.src[startOff:s.nextOffset])
 		}
 	}
 
-	return Number, string(s.src[startOff:s.offset])
+	return NumberToken, string(s.src[startOff:s.offset])
 }
 
 // scanWord scans a word or a decorator
@@ -198,7 +198,7 @@ func (s *SrcScanner) scanWord() (TokenType, string) {
 
 	for !s.isPunctuation() && !s.isWhitespace() {
 		if !s.next() {
-			return Illegal, string(s.src[startOff:s.nextOffset])
+			return IllegalToken, string(s.src[startOff:s.nextOffset])
 		}
 	}
 
@@ -207,12 +207,12 @@ func (s *SrcScanner) scanWord() (TokenType, string) {
 	// if we're on a (, this is a decorator and not a word
 	if s.ch == '(' {
 		if !s.next() {
-			return Illegal, string(s.src[startOff:s.nextOffset])
+			return IllegalToken, string(s.src[startOff:s.nextOffset])
 		}
-		return DecoratorStart, content
+		return DecoratorStartToken, content
 	}
 
-	return Word, content
+	return WordToken, content
 }
 
 // scanComment scans a comment
@@ -221,11 +221,11 @@ func (s *SrcScanner) scanComment() (TokenType, string) {
 
 	for s.ch != '\n' {
 		if !s.next() {
-			return Illegal, string(s.src[startOff:s.nextOffset])
+			return IllegalToken, string(s.src[startOff:s.nextOffset])
 		}
 	}
 
-	return Comment, string(s.src[startOff:s.offset])
+	return CommentToken, string(s.src[startOff:s.offset])
 }
 
 // scanString scans a string. Should be called on a string opening char
@@ -237,7 +237,7 @@ func (s *SrcScanner) scanString() (TokenType, string) {
 
 	// skip the opening char
 	if !s.next() {
-		return Illegal, string(s.src[startOff:s.nextOffset])
+		return IllegalToken, string(s.src[startOff:s.nextOffset])
 	}
 	startOff++
 
@@ -263,14 +263,14 @@ func (s *SrcScanner) scanString() (TokenType, string) {
 		}
 
 		if !s.next() {
-			return Illegal, string(s.src[startOff:s.nextOffset])
+			return IllegalToken, string(s.src[startOff:s.nextOffset])
 		}
 	}
 
 	// skip the ending char
 	if !s.next() {
-		return Illegal, string(s.src[startOff:s.nextOffset])
+		return IllegalToken, string(s.src[startOff:s.nextOffset])
 	}
 
-	return String, string(content)
+	return StringToken, string(content)
 }
