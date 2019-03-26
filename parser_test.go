@@ -80,7 +80,7 @@ func TestParser(t *testing.T) {
 				Token{Type: MapKVDelimToken},
 				Token{Type: WordToken, Content: "value"},
 				Token{Type: MapEndToken},
-				Token{Type: MapEndToken},
+				Token{Type: EOFToken},
 			},
 			&Map{
 				children: []Node{
@@ -89,6 +89,30 @@ func TestParser(t *testing.T) {
 						children: []Node{
 							&ValueNode{nodeType: WordType, val: "key"},
 							&ValueNode{nodeType: WordType, val: "value"},
+						},
+					},
+				},
+			},
+		},
+
+		{
+			"nested list",
+			[]Token{
+				Token{Type: WordToken, Content: "list"},
+				Token{Type: MapKVDelimToken},
+				Token{Type: ListStartToken},
+				Token{Type: WordToken, Content: "item1"},
+				Token{Type: WordToken, Content: "item2"},
+				Token{Type: ListEndToken},
+				Token{Type: EOFToken},
+			},
+			&Map{
+				children: []Node{
+					&ValueNode{nodeType: WordType, val: "list"},
+					&List{
+						children: []Node{
+							&ValueNode{nodeType: WordType, val: "item1"},
+							&ValueNode{nodeType: WordType, val: "item2"},
 						},
 					},
 				},

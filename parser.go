@@ -80,6 +80,23 @@ func parseMap(scan Scanner) (*Map, error) {
 	}
 }
 
+// parseList parses and returns a list
+func parseList(scan Scanner) (*List, error) {
+	list := &List{children: []Node{}}
+	for {
+		// scan the next value
+		node, err := parseValue(scan, true, ListEndToken)
+		if err != nil {
+			return nil, err
+		}
+		if node == nil {
+			return list, nil
+		}
+
+		list.children = append(list.children, node)
+	}
+}
+
 // parseValue parses and returns a node for a value type, or an error if no
 // value type could be parsed. If the mapKey param is true then only those
 // types that are valid for a map key are allowed
@@ -99,6 +116,8 @@ func parseValue(scan Scanner, mapKey bool, closeType TokenType) (Node, error) {
 		return &ValueNode{nodeType: NumberType, val: token.Content}, nil
 	case token.Type == MapStartToken && !mapKey:
 		return parseMap(scan)
+	case token.Type == ListStartToken && !mapKey:
+		return parseList(scan)
 	default:
 		return nil, &parseError{
 			msg:    "Illegal token",
