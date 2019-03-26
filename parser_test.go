@@ -69,6 +69,31 @@ func TestParser(t *testing.T) {
 				},
 			},
 		},
+
+		{
+			"nested map",
+			[]Token{
+				Token{Type: WordToken, Content: "map"},
+				Token{Type: MapKVDelimToken},
+				Token{Type: MapStartToken},
+				Token{Type: WordToken, Content: "key"},
+				Token{Type: MapKVDelimToken},
+				Token{Type: WordToken, Content: "value"},
+				Token{Type: MapEndToken},
+				Token{Type: MapEndToken},
+			},
+			&Map{
+				children: []Node{
+					&ValueNode{nodeType: WordType, val: "map"},
+					&Map{
+						children: []Node{
+							&ValueNode{nodeType: WordType, val: "key"},
+							&ValueNode{nodeType: WordType, val: "value"},
+						},
+					},
+				},
+			},
+		},
 	}
 
 	for _, test := range tests {

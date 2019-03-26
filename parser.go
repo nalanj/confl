@@ -97,6 +97,8 @@ func parseValue(scan Scanner, mapKey bool, closeType TokenType) (Node, error) {
 		return &ValueNode{nodeType: StringType, val: token.Content}, nil
 	case token.Type == NumberToken && !mapKey:
 		return &ValueNode{nodeType: NumberType, val: token.Content}, nil
+	case token.Type == MapStartToken && !mapKey:
+		return parseMap(scan)
 	default:
 		return nil, &parseError{
 			msg:    "Illegal token",
