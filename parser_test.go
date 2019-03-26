@@ -32,12 +32,17 @@ func TestParser(t *testing.T) {
 				Token{Type: WordToken, Content: "test"},
 				Token{Type: MapKVDelimToken},
 				Token{Type: NumberToken, Content: "23"},
+				Token{Type: StringToken, Content: "also"},
+				Token{Type: MapKVDelimToken},
+				Token{Type: WordToken, Content: "this"},
 				Token{Type: EOFToken},
 			},
 			&Map{
 				children: []Node{
 					&ValueNode{nodeType: WordType, val: "test"},
 					&ValueNode{nodeType: NumberType, val: "23"},
+					&ValueNode{nodeType: StringType, val: "also"},
+					&ValueNode{nodeType: WordType, val: "this"},
 				},
 			},
 		},
