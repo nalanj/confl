@@ -2,7 +2,7 @@
 
 ## Immediate
 
-- test parseValue in isolation using fake scanner
+- add list support
 
 ## Upcoming
 - parser
