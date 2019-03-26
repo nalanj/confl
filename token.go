@@ -31,9 +31,6 @@ const (
 	// ListEndToken represents the end of a list token
 	ListEndToken
 
-	// CommentToken represents a comment token
-	CommentToken
-
 	// StringToken represents a string token
 	StringToken
 
