@@ -36,8 +36,8 @@ func TestParser(t *testing.T) {
 			},
 			&Map{
 				children: []Node{
-					&Word{val: "test"},
-					&Number{val: "23"},
+					&ValueNode{nodeType: WordType, val: "test"},
+					&ValueNode{nodeType: NumberType, val: "23"},
 				},
 			},
 		},
