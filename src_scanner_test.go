@@ -83,9 +83,9 @@ func TestScan(t *testing.T) {
 			"comment",
 			[]byte("word # comment\nword"),
 			[]TokenType{
-				WordToken, CommentToken, WordToken, EOFToken,
+				WordToken, WordToken, EOFToken,
 			},
-			[]string{"word", "# comment", "word", ""},
+			[]string{"word", "word", ""},
 		},
 		{
 			"simple string with double quote",
@@ -139,7 +139,6 @@ func TestScan(t *testing.T) {
 			}	
 			`),
 			[]TokenType{
-				CommentToken,
 				DecoratorStartToken, WordToken, DecoratorEndToken, MapKVDelimToken, MapStartToken,
 				WordToken, MapKVDelimToken, StringToken,
 				WordToken, MapKVDelimToken, StringToken,
@@ -156,7 +155,6 @@ func TestScan(t *testing.T) {
 				MapEndToken, EOFToken,
 			},
 			[]string{
-				"# Simple wifi configuration",
 				"device", "wifi0", "", "", "",
 				"network", "", "Pretty fly for a wifi",
 				"key", "", "Some long wpa key",

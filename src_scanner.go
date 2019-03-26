@@ -78,7 +78,8 @@ func (s *SrcScanner) Token() Token {
 
 	// TODO: handle BOM if at 0
 
-	s.skipWhitespace()
+	for s.skipWhitespace() || s.skipComment() {
+	}
 
 	offset := s.offset
 	advance := false
@@ -108,8 +109,6 @@ func (s *SrcScanner) Token() Token {
 	case s.ch == ']':
 		token.Type = ListEndToken
 		advance = true
-	case s.ch == '#':
-		token.Type, token.Content = s.scanComment()
 	case s.isStringDelim():
 		token.Type, token.Content = s.scanString()
 	default:
@@ -137,7 +136,7 @@ func (s *SrcScanner) isWhitespace() bool {
 // isPunctuation notes if the current ch is one of the punctuation chars
 func (s *SrcScanner) isPunctuation() bool {
 	if s.ch == '{' || s.ch == '}' || s.ch == '[' || s.ch == ']' || s.ch == '=' ||
-		s.ch == '(' || s.ch == ')' || s.ch == runeEOF {
+		s.ch == '(' || s.ch == ')' || s.ch == '#' || s.ch == runeEOF {
 
 		return true
 	}
@@ -160,10 +159,30 @@ func (s *SrcScanner) isStringDelim() bool {
 }
 
 // skipWhitespace reads through whitespace
-func (s *SrcScanner) skipWhitespace() {
+func (s *SrcScanner) skipWhitespace() bool {
+	skipped := false
+
 	for s.isWhitespace() {
+		skipped = true
 		s.next()
 	}
+
+	return skipped
+}
+
+// skipComment ignores a comment
+func (s *SrcScanner) skipComment() bool {
+	skipped := false
+
+	if s.ch == '#' {
+		skipped = true
+
+		for s.ch != '\n' {
+			s.next()
+		}
+	}
+
+	return skipped
 }
 
 // scanNumber scans numbers
@@ -213,19 +232,6 @@ func (s *SrcScanner) scanWord() (TokenType, string) {
 	}
 
 	return WordToken, content
-}
-
-// scanComment scans a comment
-func (s *SrcScanner) scanComment() (TokenType, string) {
-	startOff := s.offset
-
-	for s.ch != '\n' {
-		if !s.next() {
-			return IllegalToken, string(s.src[startOff:s.nextOffset])
-		}
-	}
-
-	return CommentToken, string(s.src[startOff:s.offset])
 }
 
 // scanString scans a string. Should be called on a string opening char
