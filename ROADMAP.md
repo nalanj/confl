@@ -2,7 +2,8 @@
 
 ## Immediate
 
-- add list support
+- decorators
+- readme updates
 
 ## Upcoming
 - parser

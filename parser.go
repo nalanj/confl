@@ -33,21 +33,23 @@ func (p *peekScanner) peek() *Token {
 func Parse(scan Scanner) (*Map, error) {
 	peek := &peekScanner{scanner: scan}
 
+	endDelim := EOFToken
 	startToken := peek.peek()
 	if startToken.Type == MapStartToken {
+		endDelim = MapEndToken
 		peek.Token()
 	}
 
-	return parseMap(peek)
+	return parseMap(peek, endDelim)
 }
 
 // parseMap parses a map
-func parseMap(scan Scanner) (*Map, error) {
+func parseMap(scan Scanner, endDelim TokenType) (*Map, error) {
 	aMap := &Map{children: []Node{}}
 
 	for {
 		// scan the key
-		keyNode, keyErr := parseValue(scan, true, MapEndToken)
+		keyNode, keyErr := parseValue(scan, true, endDelim)
 		if keyErr != nil {
 			return nil, keyErr
 		}
@@ -65,7 +67,7 @@ func parseMap(scan Scanner) (*Map, error) {
 		}
 
 		// read and append the value
-		valNode, valErr := parseValue(scan, false, MapEndToken)
+		valNode, valErr := parseValue(scan, false, endDelim)
 		if valErr != nil {
 			return nil, valErr
 		}
@@ -106,7 +108,7 @@ func parseValue(scan Scanner, mapKey bool, closeType TokenType) (Node, error) {
 	token := scan.Token()
 
 	switch {
-	case token.Type == EOFToken || token.Type == closeType:
+	case token.Type == closeType:
 		return nil, nil
 	case token.Type == WordToken:
 		return &ValueNode{nodeType: WordType, val: token.Content}, nil
@@ -115,7 +117,7 @@ func parseValue(scan Scanner, mapKey bool, closeType TokenType) (Node, error) {
 	case token.Type == NumberToken && !mapKey:
 		return &ValueNode{nodeType: NumberType, val: token.Content}, nil
 	case token.Type == MapStartToken && !mapKey:
-		return parseMap(scan)
+		return parseMap(scan, MapEndToken)
 	case token.Type == ListStartToken && !mapKey:
 		return parseList(scan)
 	default:

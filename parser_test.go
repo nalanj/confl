@@ -24,6 +24,7 @@ func TestParser(t *testing.T) {
 		name   string
 		tokens []Token
 		doc    *Map
+		err    bool
 	}{
 
 		{
@@ -45,6 +46,23 @@ func TestParser(t *testing.T) {
 					&ValueNode{nodeType: WordType, val: "this"},
 				},
 			},
+			false,
+		},
+
+		{
+			"implicit document map, illegal end token",
+			[]Token{
+				Token{Type: WordToken, Content: "test"},
+				Token{Type: MapKVDelimToken},
+				Token{Type: NumberToken, Content: "23"},
+				Token{Type: StringToken, Content: "also"},
+				Token{Type: MapKVDelimToken},
+				Token{Type: WordToken, Content: "this"},
+				Token{Type: MapEndToken},
+				Token{Type: EOFToken},
+			},
+			nil,
+			true,
 		},
 
 		{
@@ -68,6 +86,23 @@ func TestParser(t *testing.T) {
 					&ValueNode{nodeType: WordType, val: "this"},
 				},
 			},
+			false,
+		},
+
+		{
+			"explicit document map, illegal end token",
+			[]Token{
+				Token{Type: MapStartToken},
+				Token{Type: WordToken, Content: "test"},
+				Token{Type: MapKVDelimToken},
+				Token{Type: NumberToken, Content: "23"},
+				Token{Type: StringToken, Content: "also"},
+				Token{Type: MapKVDelimToken},
+				Token{Type: WordToken, Content: "this"},
+				Token{Type: EOFToken},
+			},
+			nil,
+			true,
 		},
 
 		{
@@ -93,6 +128,7 @@ func TestParser(t *testing.T) {
 					},
 				},
 			},
+			false,
 		},
 
 		{
@@ -117,6 +153,7 @@ func TestParser(t *testing.T) {
 					},
 				},
 			},
+			false,
 		},
 	}
 
@@ -124,7 +161,7 @@ func TestParser(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			scan := &mockScanner{tokens: test.tokens}
 			doc, err := Parse(scan)
-			assert.Nil(t, err)
+			assert.Equal(t, test.err, err != nil)
 			assert.Equal(t, test.doc, doc)
 		})
 	}
