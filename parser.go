@@ -1,45 +1,76 @@
 package confl
 
-// Parse parses a document and returns an AST
-func Parse(scan Scanner) (*Map, error) {
-	docMap := &Map{children: []Node{}}
+// peekScanner lets us peek one element ahead
+type peekScanner struct {
+	scanner Scanner
+	peeked  *Token
+}
 
-	if err := parseMap(scan, docMap); err != nil {
-		return nil, err
+// Token returns the peeked token if it's there, or the next token
+func (p *peekScanner) Token() *Token {
+	token := p.peeked
+	p.peeked = nil
+
+	if token == nil {
+		token = p.scanner.Token()
+	}
+	return token
+}
+
+// peek looks ahead one token space. Subsequent calls will return the same
+// peeked token until Token is called
+func (p *peekScanner) peek() *Token {
+	token := p.peeked
+	if token == nil {
+		p.peeked = p.scanner.Token()
+		token = p.peeked
 	}
 
-	return docMap, nil
+	return token
+}
+
+// Parse parses a document and returns an AST
+func Parse(scan Scanner) (*Map, error) {
+	peek := &peekScanner{scanner: scan}
+
+	startToken := peek.peek()
+	if startToken.Type == MapStartToken {
+		peek.Token()
+	}
+
+	return parseMap(peek)
 }
 
 // parseMap parses a map
-func parseMap(scan Scanner, aMap *Map) error {
-	for {
+func parseMap(scan Scanner) (*Map, error) {
+	aMap := &Map{children: []Node{}}
 
+	for {
 		// scan the key
-		keyNode, keyErr := parseValue(scan, true)
+		keyNode, keyErr := parseValue(scan, true, MapEndToken)
 		if keyErr != nil {
-			return keyErr
+			return nil, keyErr
 		}
 		if keyNode == nil {
-			return nil
+			return aMap, nil
 		}
 
 		// read the delimiter
 		delimToken := scan.Token()
 		if delimToken.Type != MapKVDelimToken {
-			return &parseError{
+			return nil, &parseError{
 				msg:    "Illegal token, expected map delimiter `=`",
 				offset: delimToken.Offset,
 			}
 		}
 
 		// read and append the value
-		valNode, valErr := parseValue(scan, false)
+		valNode, valErr := parseValue(scan, false, MapEndToken)
 		if valErr != nil {
-			return valErr
+			return nil, valErr
 		}
 		if valNode == nil {
-			return &parseError{
+			return nil, &parseError{
 				msg:    "Illegal token, expected map value, got EOF",
 				offset: -1,
 			}
@@ -52,13 +83,13 @@ func parseMap(scan Scanner, aMap *Map) error {
 // parseValue parses and returns a node for a value type, or an error if no
 // value type could be parsed. If the mapKey param is true then only those
 // types that are valid for a map key are allowed
-func parseValue(scan Scanner, mapKey bool) (Node, error) {
+func parseValue(scan Scanner, mapKey bool, closeType TokenType) (Node, error) {
 
 	// read the value
 	token := scan.Token()
 
 	switch {
-	case token.Type == EOFToken:
+	case token.Type == EOFToken || token.Type == closeType:
 		return nil, nil
 	case token.Type == WordToken:
 		return &ValueNode{nodeType: WordType, val: token.Content}, nil

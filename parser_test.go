@@ -13,10 +13,10 @@ type mockScanner struct {
 }
 
 // Token returns the next token from the mock scanner
-func (s *mockScanner) Token() Token {
+func (s *mockScanner) Token() *Token {
 	cur := s.currentToken
 	s.currentToken++
-	return s.tokens[cur]
+	return &s.tokens[cur]
 }
 
 func TestParser(t *testing.T) {
@@ -35,6 +35,29 @@ func TestParser(t *testing.T) {
 				Token{Type: StringToken, Content: "also"},
 				Token{Type: MapKVDelimToken},
 				Token{Type: WordToken, Content: "this"},
+				Token{Type: EOFToken},
+			},
+			&Map{
+				children: []Node{
+					&ValueNode{nodeType: WordType, val: "test"},
+					&ValueNode{nodeType: NumberType, val: "23"},
+					&ValueNode{nodeType: StringType, val: "also"},
+					&ValueNode{nodeType: WordType, val: "this"},
+				},
+			},
+		},
+
+		{
+			"explicit document map",
+			[]Token{
+				Token{Type: MapStartToken},
+				Token{Type: WordToken, Content: "test"},
+				Token{Type: MapKVDelimToken},
+				Token{Type: NumberToken, Content: "23"},
+				Token{Type: StringToken, Content: "also"},
+				Token{Type: MapKVDelimToken},
+				Token{Type: WordToken, Content: "this"},
+				Token{Type: MapEndToken},
 				Token{Type: EOFToken},
 			},
 			&Map{

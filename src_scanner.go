@@ -67,13 +67,13 @@ func Init(src []byte) *SrcScanner {
 }
 
 // Token returns the next token, offset, and string content
-func (s *SrcScanner) Token() Token {
+func (s *SrcScanner) Token() *Token {
 	var token Token
 
 	// advance to the first character if at the beginning of the source
 	if s.offset == 0 && !s.next() {
 		token.Type = IllegalToken
-		return token
+		return &token
 	}
 
 	// TODO: handle BOM if at 0
@@ -122,7 +122,7 @@ func (s *SrcScanner) Token() Token {
 		}
 	}
 
-	return token
+	return &token
 }
 
 // isWhitespace returns whether the current ch is whitespace
