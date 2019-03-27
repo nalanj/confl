@@ -8,35 +8,45 @@ import (
 
 // mockScanner outputs tokens directly
 type mockScanner struct {
-	tokens       []Token
-	currentToken int
+	tokens  []*Token
+	current int
 }
 
 // Token returns the next token from the mock scanner
 func (s *mockScanner) Token() *Token {
-	cur := s.currentToken
-	s.currentToken++
-	return &s.tokens[cur]
+	cur := s.current
+	s.current++
+	return s.tokens[cur]
+}
+
+// Peek returns the next count tokens, up to an eof
+func (s *mockScanner) Peek(count int) []*Token {
+	end := s.current + count
+	if end > len(s.tokens) {
+		end = len(s.tokens)
+	}
+
+	return s.tokens[s.current:end]
 }
 
 func TestParser(t *testing.T) {
 	tests := []struct {
 		name   string
-		tokens []Token
+		tokens []*Token
 		doc    *Map
 		err    bool
 	}{
 
 		{
 			"implicit document map",
-			[]Token{
-				Token{Type: WordToken, Content: "test"},
-				Token{Type: MapKVDelimToken},
-				Token{Type: NumberToken, Content: "23"},
-				Token{Type: StringToken, Content: "also"},
-				Token{Type: MapKVDelimToken},
-				Token{Type: WordToken, Content: "this"},
-				Token{Type: EOFToken},
+			[]*Token{
+				&Token{Type: WordToken, Content: "test"},
+				&Token{Type: MapKVDelimToken},
+				&Token{Type: NumberToken, Content: "23"},
+				&Token{Type: StringToken, Content: "also"},
+				&Token{Type: MapKVDelimToken},
+				&Token{Type: WordToken, Content: "this"},
+				&Token{Type: EOFToken},
 			},
 			&Map{
 				children: []Node{
@@ -51,15 +61,15 @@ func TestParser(t *testing.T) {
 
 		{
 			"implicit document map, illegal end token",
-			[]Token{
-				Token{Type: WordToken, Content: "test"},
-				Token{Type: MapKVDelimToken},
-				Token{Type: NumberToken, Content: "23"},
-				Token{Type: StringToken, Content: "also"},
-				Token{Type: MapKVDelimToken},
-				Token{Type: WordToken, Content: "this"},
-				Token{Type: MapEndToken},
-				Token{Type: EOFToken},
+			[]*Token{
+				&Token{Type: WordToken, Content: "test"},
+				&Token{Type: MapKVDelimToken},
+				&Token{Type: NumberToken, Content: "23"},
+				&Token{Type: StringToken, Content: "also"},
+				&Token{Type: MapKVDelimToken},
+				&Token{Type: WordToken, Content: "this"},
+				&Token{Type: MapEndToken},
+				&Token{Type: EOFToken},
 			},
 			nil,
 			true,
@@ -67,16 +77,16 @@ func TestParser(t *testing.T) {
 
 		{
 			"explicit document map",
-			[]Token{
-				Token{Type: MapStartToken},
-				Token{Type: WordToken, Content: "test"},
-				Token{Type: MapKVDelimToken},
-				Token{Type: NumberToken, Content: "23"},
-				Token{Type: StringToken, Content: "also"},
-				Token{Type: MapKVDelimToken},
-				Token{Type: WordToken, Content: "this"},
-				Token{Type: MapEndToken},
-				Token{Type: EOFToken},
+			[]*Token{
+				&Token{Type: MapStartToken},
+				&Token{Type: WordToken, Content: "test"},
+				&Token{Type: MapKVDelimToken},
+				&Token{Type: NumberToken, Content: "23"},
+				&Token{Type: StringToken, Content: "also"},
+				&Token{Type: MapKVDelimToken},
+				&Token{Type: WordToken, Content: "this"},
+				&Token{Type: MapEndToken},
+				&Token{Type: EOFToken},
 			},
 			&Map{
 				children: []Node{
@@ -91,15 +101,15 @@ func TestParser(t *testing.T) {
 
 		{
 			"explicit document map, illegal end token",
-			[]Token{
-				Token{Type: MapStartToken},
-				Token{Type: WordToken, Content: "test"},
-				Token{Type: MapKVDelimToken},
-				Token{Type: NumberToken, Content: "23"},
-				Token{Type: StringToken, Content: "also"},
-				Token{Type: MapKVDelimToken},
-				Token{Type: WordToken, Content: "this"},
-				Token{Type: EOFToken},
+			[]*Token{
+				&Token{Type: MapStartToken},
+				&Token{Type: WordToken, Content: "test"},
+				&Token{Type: MapKVDelimToken},
+				&Token{Type: NumberToken, Content: "23"},
+				&Token{Type: StringToken, Content: "also"},
+				&Token{Type: MapKVDelimToken},
+				&Token{Type: WordToken, Content: "this"},
+				&Token{Type: EOFToken},
 			},
 			nil,
 			true,
@@ -107,15 +117,15 @@ func TestParser(t *testing.T) {
 
 		{
 			"nested map",
-			[]Token{
-				Token{Type: WordToken, Content: "map"},
-				Token{Type: MapKVDelimToken},
-				Token{Type: MapStartToken},
-				Token{Type: WordToken, Content: "key"},
-				Token{Type: MapKVDelimToken},
-				Token{Type: WordToken, Content: "value"},
-				Token{Type: MapEndToken},
-				Token{Type: EOFToken},
+			[]*Token{
+				&Token{Type: WordToken, Content: "map"},
+				&Token{Type: MapKVDelimToken},
+				&Token{Type: MapStartToken},
+				&Token{Type: WordToken, Content: "key"},
+				&Token{Type: MapKVDelimToken},
+				&Token{Type: WordToken, Content: "value"},
+				&Token{Type: MapEndToken},
+				&Token{Type: EOFToken},
 			},
 			&Map{
 				children: []Node{
@@ -133,14 +143,14 @@ func TestParser(t *testing.T) {
 
 		{
 			"nested list",
-			[]Token{
-				Token{Type: WordToken, Content: "list"},
-				Token{Type: MapKVDelimToken},
-				Token{Type: ListStartToken},
-				Token{Type: WordToken, Content: "item1"},
-				Token{Type: WordToken, Content: "item2"},
-				Token{Type: ListEndToken},
-				Token{Type: EOFToken},
+			[]*Token{
+				&Token{Type: WordToken, Content: "list"},
+				&Token{Type: MapKVDelimToken},
+				&Token{Type: ListStartToken},
+				&Token{Type: WordToken, Content: "item1"},
+				&Token{Type: WordToken, Content: "item2"},
+				&Token{Type: ListEndToken},
+				&Token{Type: EOFToken},
 			},
 			&Map{
 				children: []Node{
@@ -158,16 +168,16 @@ func TestParser(t *testing.T) {
 
 		{
 			"simple decorator",
-			[]Token{
-				Token{Type: DecoratorStartToken, Content: "dec"},
-				Token{Type: WordToken, Content: "test"},
-				Token{Type: DecoratorEndToken},
-				Token{Type: MapKVDelimToken},
-				Token{Type: NumberToken, Content: "23"},
-				Token{Type: StringToken, Content: "also"},
-				Token{Type: MapKVDelimToken},
-				Token{Type: WordToken, Content: "this"},
-				Token{Type: EOFToken},
+			[]*Token{
+				&Token{Type: DecoratorStartToken, Content: "dec"},
+				&Token{Type: WordToken, Content: "test"},
+				&Token{Type: DecoratorEndToken},
+				&Token{Type: MapKVDelimToken},
+				&Token{Type: NumberToken, Content: "23"},
+				&Token{Type: StringToken, Content: "also"},
+				&Token{Type: MapKVDelimToken},
+				&Token{Type: WordToken, Content: "this"},
+				&Token{Type: EOFToken},
 			},
 			&Map{
 				children: []Node{

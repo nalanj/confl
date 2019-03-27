@@ -178,7 +178,7 @@ func TestScan(t *testing.T) {
 			tokens := []TokenType{}
 			contents := []string{}
 
-			s := Init(test.document)
+			s := NewSrcScanner(test.document)
 
 			for {
 				token := s.Token()

@@ -28,6 +28,9 @@ type SrcScanner struct {
 
 	// err is the current error
 	err error
+
+	// peeked is the set of peeked tokens
+	peeked []*Token
 }
 
 // next returns the next character from the scanner
@@ -61,13 +64,49 @@ func (s *SrcScanner) next() bool {
 	return true
 }
 
-// Init returns a new scanner based on the given source
-func Init(src []byte) *SrcScanner {
-	return &SrcScanner{src: src}
+// NewSrcScanner returns a new scanner based on the given source
+func NewSrcScanner(src []byte) *SrcScanner {
+	return &SrcScanner{src: src, peeked: []*Token{}}
 }
 
-// Token returns the next token, offset, and string content
+// Token returns the peeked token if it's there, or the next token
 func (s *SrcScanner) Token() *Token {
+	var token *Token
+
+	if len(s.peeked) > 0 {
+		token = s.peeked[0]
+		s.peeked = s.peeked[1:]
+	}
+
+	if token == nil {
+		token = s.nextToken()
+	}
+
+	return token
+}
+
+// Peek returns up to count tokens, stopping on EOF if one is hit
+func (s *SrcScanner) Peek(count int) []*Token {
+	for i := 0; i < count; i++ {
+		var token *Token
+
+		if len(s.peeked) > i {
+			token = s.peeked[i]
+		} else {
+			token = s.nextToken()
+			s.peeked = append(s.peeked, token)
+		}
+
+		if token.Type == EOFToken {
+			break
+		}
+	}
+
+	return s.peeked[0:count]
+}
+
+// nextToken returns the next token, offset, and string content
+func (s *SrcScanner) nextToken() *Token {
 	var token Token
 
 	// advance to the first character if at the beginning of the source
