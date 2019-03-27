@@ -3,30 +3,44 @@ package confl
 // peekScanner lets us peek one element ahead
 type peekScanner struct {
 	scanner Scanner
-	peeked  *Token
+	peeked  []*Token
 }
 
 // Token returns the peeked token if it's there, or the next token
 func (p *peekScanner) Token() *Token {
-	token := p.peeked
-	p.peeked = nil
+	var token *Token
+
+	if len(p.peeked) > 0 {
+		token = p.peeked[0]
+		p.peeked = p.peeked[1:]
+	}
 
 	if token == nil {
 		token = p.scanner.Token()
 	}
+
 	return token
 }
 
-// peek looks ahead one token space. Subsequent calls will return the same
-// peeked token until Token is called
-func (p *peekScanner) peek() *Token {
-	token := p.peeked
-	if token == nil {
-		p.peeked = p.scanner.Token()
-		token = p.peeked
+// peek peeks from the scanner the number of tokens. If an EOF is encountered
+// peeking stops.
+func (p *peekScanner) peek(count int) []*Token {
+	for i := 0; i < count; i++ {
+		var token *Token
+
+		if len(p.peeked) > i {
+			token = p.peeked[i]
+		} else {
+			token = p.scanner.Token()
+			p.peeked = append(p.peeked, token)
+		}
+
+		if token.Type == EOFToken {
+			break
+		}
 	}
 
-	return token
+	return p.peeked[0:count]
 }
 
 // Parse parses a document and returns an AST
@@ -34,7 +48,20 @@ func Parse(scan Scanner) (*Map, error) {
 	peek := &peekScanner{scanner: scan}
 
 	endDelim := EOFToken
-	startToken := peek.peek()
+	peekedTokens := peek.peek(1)
+
+	if len(peekedTokens) != 1 {
+		return nil, &parseError{
+			msg:    "Empty document",
+			offset: 0,
+		}
+	}
+
+	startToken := peekedTokens[0]
+	if startToken.Type == EOFToken {
+		return &Map{children: []Node{}}, nil
+	}
+
 	if startToken.Type == MapStartToken {
 		endDelim = MapEndToken
 		peek.Token()
@@ -114,6 +141,8 @@ func parseValue(scan Scanner, mapKey bool, closeType TokenType) (Node, error) {
 		return &ValueNode{nodeType: WordType, val: token.Content}, nil
 	case token.Type == StringToken:
 		return &ValueNode{nodeType: StringType, val: token.Content}, nil
+	// case token.Type == DecoratorStartToken:
+	// 	return parseDecorator(scan, mapKey)
 	case token.Type == NumberToken && !mapKey:
 		return &ValueNode{nodeType: NumberType, val: token.Content}, nil
 	case token.Type == MapStartToken && !mapKey:

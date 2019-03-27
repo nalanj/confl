@@ -155,6 +155,30 @@ func TestParser(t *testing.T) {
 			},
 			false,
 		},
+
+		{
+			"simple decorator",
+			[]Token{
+				Token{Type: DecoratorStartToken, Content: "dec"},
+				Token{Type: WordToken, Content: "test"},
+				Token{Type: DecoratorEndToken},
+				Token{Type: MapKVDelimToken},
+				Token{Type: NumberToken, Content: "23"},
+				Token{Type: StringToken, Content: "also"},
+				Token{Type: MapKVDelimToken},
+				Token{Type: WordToken, Content: "this"},
+				Token{Type: EOFToken},
+			},
+			&Map{
+				children: []Node{
+					&ValueNode{nodeType: WordType, val: "test", decorator: "dec"},
+					&ValueNode{nodeType: NumberType, val: "23"},
+					&ValueNode{nodeType: StringType, val: "also"},
+					&ValueNode{nodeType: WordType, val: "this"},
+				},
+			},
+			false,
+		},
 	}
 
 	for _, test := range tests {
