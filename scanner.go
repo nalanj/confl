@@ -30,7 +30,7 @@ type scanner struct {
 	err error
 
 	// peeked is the set of peeked tokens
-	peeked []*Token
+	peeked []*token
 }
 
 // next returns the next character from the scanner
@@ -66,12 +66,12 @@ func (s *scanner) next() bool {
 
 // newScanner returns a new scanner based on the given source
 func newScanner(src []byte) *scanner {
-	return &scanner{src: src, peeked: []*Token{}}
+	return &scanner{src: src, peeked: []*token{}}
 }
 
 // Token returns the peeked token if it's there, or the next token
-func (s *scanner) Token() *Token {
-	var token *Token
+func (s *scanner) Token() *token {
+	var token *token
 
 	if len(s.peeked) > 0 {
 		token = s.peeked[0]
@@ -86,9 +86,9 @@ func (s *scanner) Token() *Token {
 }
 
 // Peek returns up to count tokens, stopping on EOF if one is hit
-func (s *scanner) Peek(count int) []*Token {
+func (s *scanner) Peek(count int) []*token {
 	for i := 0; i < count; i++ {
-		var token *Token
+		var token *token
 
 		if len(s.peeked) > i {
 			token = s.peeked[i]
@@ -97,7 +97,7 @@ func (s *scanner) Peek(count int) []*Token {
 			s.peeked = append(s.peeked, token)
 		}
 
-		if token.Type == EOFToken {
+		if token.Type == eofToken {
 			break
 		}
 	}
@@ -106,12 +106,12 @@ func (s *scanner) Peek(count int) []*Token {
 }
 
 // nextToken returns the next token, offset, and string content
-func (s *scanner) nextToken() *Token {
-	var token Token
+func (s *scanner) nextToken() *token {
+	var token token
 
 	// advance to the first character if at the beginning of the source
 	if s.offset == 0 && !s.next() {
-		token.Type = IllegalToken
+		token.Type = illegalToken
 		return &token
 	}
 
@@ -125,38 +125,38 @@ func (s *scanner) nextToken() *Token {
 
 	switch {
 	case s.ch == runeEOF:
-		token.Type = EOFToken
+		token.Type = eofToken
 	case s.isDigit():
 		token.Type, token.Content = s.scanNumber()
 	case s.isLetter():
 		token.Type, token.Content = s.scanWord()
 	case s.ch == ')':
-		token.Type = DecoratorEndToken
+		token.Type = decoratorEndToken
 		advance = true
 	case s.ch == '{':
-		token.Type = MapStartToken
+		token.Type = mapStartToken
 		advance = true
 	case s.ch == '}':
-		token.Type = MapEndToken
+		token.Type = mapEndToken
 		advance = true
 	case s.ch == '=':
-		token.Type = MapKVDelimToken
+		token.Type = mapKVDelimToken
 		advance = true
 	case s.ch == '[':
-		token.Type = ListStartToken
+		token.Type = listStartToken
 		advance = true
 	case s.ch == ']':
-		token.Type = ListEndToken
+		token.Type = listEndToken
 		advance = true
 	case s.isStringDelim():
 		token.Type, token.Content = s.scanString()
 	default:
-		token.Type = IllegalToken
+		token.Type = illegalToken
 	}
 
 	if advance {
 		if !s.next() {
-			token.Type = IllegalToken
+			token.Type = illegalToken
 			token.Content = string(s.src[offset:s.nextOffset])
 		}
 	}
@@ -225,38 +225,38 @@ func (s *scanner) skipComment() bool {
 }
 
 // scanNumber scans numbers
-func (s *scanner) scanNumber() (TokenType, string) {
+func (s *scanner) scanNumber() (tokenType, string) {
 	startOff := s.offset
 	seenDecimal := false
 
 	for !s.isPunctuation() && !s.isWhitespace() {
 		if !s.isDigit() && s.ch != '.' {
-			return IllegalToken, string(s.src[startOff:s.nextOffset])
+			return illegalToken, string(s.src[startOff:s.nextOffset])
 		}
 
 		if s.ch == '.' {
 			if seenDecimal {
-				return IllegalToken, string(s.src[startOff:s.nextOffset])
+				return illegalToken, string(s.src[startOff:s.nextOffset])
 			}
 
 			seenDecimal = true
 		}
 
 		if !s.next() {
-			return IllegalToken, string(s.src[startOff:s.nextOffset])
+			return illegalToken, string(s.src[startOff:s.nextOffset])
 		}
 	}
 
-	return NumberToken, string(s.src[startOff:s.offset])
+	return numberToken, string(s.src[startOff:s.offset])
 }
 
 // scanWord scans a word or a decorator
-func (s *scanner) scanWord() (TokenType, string) {
+func (s *scanner) scanWord() (tokenType, string) {
 	startOff := s.offset
 
 	for !s.isPunctuation() && !s.isWhitespace() {
 		if !s.next() {
-			return IllegalToken, string(s.src[startOff:s.nextOffset])
+			return illegalToken, string(s.src[startOff:s.nextOffset])
 		}
 	}
 
@@ -265,16 +265,16 @@ func (s *scanner) scanWord() (TokenType, string) {
 	// if we're on a (, this is a decorator and not a word
 	if s.ch == '(' {
 		if !s.next() {
-			return IllegalToken, string(s.src[startOff:s.nextOffset])
+			return illegalToken, string(s.src[startOff:s.nextOffset])
 		}
-		return DecoratorStartToken, content
+		return decoratorStartToken, content
 	}
 
-	return WordToken, content
+	return wordToken, content
 }
 
 // scanString scans a string. Should be called on a string opening char
-func (s *scanner) scanString() (TokenType, string) {
+func (s *scanner) scanString() (tokenType, string) {
 	delim := s.ch
 	startOff := s.offset
 	var content []byte
@@ -282,7 +282,7 @@ func (s *scanner) scanString() (TokenType, string) {
 
 	// skip the opening char
 	if !s.next() {
-		return IllegalToken, string(s.src[startOff:s.nextOffset])
+		return illegalToken, string(s.src[startOff:s.nextOffset])
 	}
 	startOff++
 
@@ -308,14 +308,14 @@ func (s *scanner) scanString() (TokenType, string) {
 		}
 
 		if !s.next() {
-			return IllegalToken, string(s.src[startOff:s.nextOffset])
+			return illegalToken, string(s.src[startOff:s.nextOffset])
 		}
 	}
 
 	// skip the ending char
 	if !s.next() {
-		return IllegalToken, string(s.src[startOff:s.nextOffset])
+		return illegalToken, string(s.src[startOff:s.nextOffset])
 	}
 
-	return StringToken, string(content)
+	return stringToken, string(content)
 }

@@ -1,51 +1,51 @@
 package confl
 
 // TokenType represents the various types of tokens
-type TokenType uint
+type tokenType uint
 
 const (
-	// IllegalToken represents an illegal token
-	IllegalToken TokenType = iota
+	// illegalToken represents an illegal token
+	illegalToken tokenType = iota
 
-	// EOFToken represents a token for the end of the file
-	EOFToken
+	// eofToken represents a token for the end of the file
+	eofToken
 
-	// NumberToken represents a number token
-	NumberToken
+	// numberToken represents a number token
+	numberToken
 
-	// WordToken represents a word token
-	WordToken
+	// wordToken represents a word token
+	wordToken
 
-	// MapStartToken represents the start of a map token
-	MapStartToken
+	// mapStartToken represents the start of a map token
+	mapStartToken
 
-	// MapEndToken represents the end of a map token
-	MapEndToken
+	// mapEndToken represents the end of a map token
+	mapEndToken
 
-	// MapKVDelimToken represents a key value delimiter token
-	MapKVDelimToken
+	// mapKVDelimToken represents a key value delimiter token
+	mapKVDelimToken
 
-	// ListStartToken represents the start of a list token
-	ListStartToken
+	// listStartToken represents the start of a list token
+	listStartToken
 
-	// ListEndToken represents the end of a list token
-	ListEndToken
+	// listEndToken represents the end of a list token
+	listEndToken
 
-	// StringToken represents a string token
-	StringToken
+	// stringToken represents a string token
+	stringToken
 
-	// DecoratorStartToken represents the start of a decorator
-	DecoratorStartToken
+	// decoratorStartToken represents the start of a decorator
+	decoratorStartToken
 
-	// DecoratorEndToken represents the end of a decorator
-	DecoratorEndToken
+	// decoratorEndToken represents the end of a decorator
+	decoratorEndToken
 )
 
-// Token is a token from the scanner
-type Token struct {
+// token is a token from the scanner
+type token struct {
 
 	// Type of the token
-	Type TokenType
+	Type tokenType
 
 	// Offset of the token in the source
 	Offset int

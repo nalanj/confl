@@ -18,7 +18,7 @@ func Parse(r io.Reader) (Node, error) {
 
 // parseScanner parses a document and returns an AST
 func parseScanner(scan *scanner) (Node, error) {
-	endDelim := EOFToken
+	endDelim := eofToken
 	peekedTokens := scan.Peek(1)
 
 	if len(peekedTokens) != 1 {
@@ -26,12 +26,12 @@ func parseScanner(scan *scanner) (Node, error) {
 	}
 
 	startToken := peekedTokens[0]
-	if startToken.Type == EOFToken {
+	if startToken.Type == eofToken {
 		return &mapNode{children: []Node{}}, nil
 	}
 
-	if startToken.Type == MapStartToken {
-		endDelim = MapEndToken
+	if startToken.Type == mapStartToken {
+		endDelim = mapEndToken
 		scan.Token()
 	}
 
@@ -39,7 +39,7 @@ func parseScanner(scan *scanner) (Node, error) {
 }
 
 // parseMap parses a map
-func parseMap(scan *scanner, endDelim TokenType, decorator string) (*mapNode, error) {
+func parseMap(scan *scanner, endDelim tokenType, decorator string) (*mapNode, error) {
 	aMap := &mapNode{children: []Node{}, decorator: decorator}
 
 	for {
@@ -54,7 +54,7 @@ func parseMap(scan *scanner, endDelim TokenType, decorator string) (*mapNode, er
 
 		// read the delimiter
 		delimToken := scan.Token()
-		if delimToken.Type != MapKVDelimToken {
+		if delimToken.Type != mapKVDelimToken {
 			return nil, newParseError(
 				"Illegal token, expected map delimiter `=`",
 				scan,
@@ -84,7 +84,7 @@ func parseList(scan *scanner, decorator string) (*listNode, error) {
 	list := &listNode{children: []Node{}, decorator: decorator}
 	for {
 		// scan the next value
-		node, err := parseValue(scan, false, ListEndToken, "")
+		node, err := parseValue(scan, false, listEndToken, "")
 		if err != nil {
 			return nil, err
 		}
@@ -103,7 +103,7 @@ func parseDecoratorContents(
 	decorator string,
 ) (Node, error) {
 
-	node, err := parseValue(scan, mapKey, DecoratorEndToken, decorator)
+	node, err := parseValue(scan, mapKey, decoratorEndToken, decorator)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +117,7 @@ func parseDecoratorContents(
 // parseValue parses and returns a node for a value type, or an error if no
 // value type could be parsed. If the mapKey param is true then only those
 // types that are valid for a map key are allowed
-func parseValue(scan *scanner, mapKey bool, closeType TokenType, decorator string) (Node, error) {
+func parseValue(scan *scanner, mapKey bool, closeType tokenType, decorator string) (Node, error) {
 
 	// read the value
 	token := scan.Token()
@@ -125,29 +125,29 @@ func parseValue(scan *scanner, mapKey bool, closeType TokenType, decorator strin
 	switch {
 	case token.Type == closeType:
 		return nil, nil
-	case token.Type == WordToken:
+	case token.Type == wordToken:
 		return &ValueNode{
 			nodeType:  WordType,
 			val:       token.Content,
 			decorator: decorator,
 		}, nil
-	case token.Type == StringToken:
+	case token.Type == stringToken:
 		return &ValueNode{
 			nodeType:  StringType,
 			val:       token.Content,
 			decorator: decorator,
 		}, nil
-	case token.Type == DecoratorStartToken:
+	case token.Type == decoratorStartToken:
 		return parseDecoratorContents(scan, mapKey, token.Content)
-	case token.Type == NumberToken && !mapKey:
+	case token.Type == numberToken && !mapKey:
 		return &ValueNode{
 			nodeType:  NumberType,
 			val:       token.Content,
 			decorator: decorator,
 		}, nil
-	case token.Type == MapStartToken && !mapKey:
-		return parseMap(scan, MapEndToken, decorator)
-	case token.Type == ListStartToken && !mapKey:
+	case token.Type == mapStartToken && !mapKey:
+		return parseMap(scan, mapEndToken, decorator)
+	case token.Type == listStartToken && !mapKey:
 		return parseList(scan, decorator)
 	default:
 		return nil, newParseError(
