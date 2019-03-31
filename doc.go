@@ -4,7 +4,7 @@ languages like YAML, JSON, and TOML. The focus with Confl is to keep the
 syntax as simple as possible while also achieving a high amount of
 expressiveness.
 
-## Example Document
+Example Document
 
 Here's an example that shows most of the features of confl.
 
@@ -21,7 +21,9 @@ Here's an example that shows most of the features of confl.
 	}
 
 
-It can be parsed using `confl.Parse()`:
+Parsing
+
+Documents parsed using `confl.Parse()`:
 
 	doc, err := confl.Parse(reader)
 
