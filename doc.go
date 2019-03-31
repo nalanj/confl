@@ -8,7 +8,7 @@ Example Document
 
 Here's an example that shows most of the features of confl.
 
-  # Simple wifi configuration
+	# Simple wifi configuration
 	device(wifi0)={
 		network="Pretty fly for a wifi"
 		key="Some long wpa key"
@@ -19,7 +19,6 @@ Here's an example that shows most of the features of confl.
 
 		vpn={host="12.12.12.12" user=frank pass=secret key=path(/etc/vpn.key)}
 	}
-
 
 Parsing
 
