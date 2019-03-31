@@ -85,26 +85,15 @@ func parseDecoratorContents(
 	decorator string,
 ) (Node, error) {
 
-	// peek two nodes to figure out the type
-	peeked := scan.Peek(2)
-	if len(peeked) != 2 {
-		return nil, &parseError{msg: "Illegal token"}
+	node, err := parseValue(scan, mapKey, DecoratorEndToken, decorator)
+	if err != nil {
+		return nil, err
 	}
 
-	switch {
-	case peeked[1].Type == DecoratorEndToken:
-		node, err := parseValue(scan, mapKey, DecoratorEndToken, decorator)
-		if err != nil {
-			return nil, err
-		}
-		// eat the closing decorator delimiter
-		scan.Token()
-		return node, nil
-		// case peeked[1].Type == MapKVDelimToken && !mapKey:
-		// 	return parseMap(scan, MapEndToken, decorator)
-	}
+	// eat the closing decorator delimiter
+	scan.Token()
 
-	return nil, nil
+	return node, nil
 }
 
 // parseValue parses and returns a node for a value type, or an error if no

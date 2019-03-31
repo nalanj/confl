@@ -89,6 +89,8 @@ The keys and values are separated by an equal `=` sign. Confl doens't care
 about whitespace outside of strings, so a map may be all on a single line or
 spread across multiple lines. Maps are surrounded by curly `{}` braces.
 
+Map keys must be words or strings.
+
 ```
 {key=value "another key"="another value" number=12 map={another=map}}
 
@@ -136,16 +138,5 @@ decorator is communicated as a word with a pair of attached parenthesis.
 decorator(12)
 ```
 
-A decorator can contain any other type.
-
-Lists in a decorator can include or exclude the surrounding brackets.
-
-```
-list_decorator(test, 12)
-```
-
-Maps in a decorator can exclude the surrounded braces as well:
-
-```
-map_decorator(foo=bar blah=baz)
-```
+A decorator can contain any other type, so long as the type would be valid in
+that context without a decorator as well.

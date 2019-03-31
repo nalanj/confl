@@ -189,6 +189,52 @@ func TestParser(t *testing.T) {
 			},
 			false,
 		},
+
+		{
+			"decorator on list as map key errors",
+			[]*Token{
+				&Token{Type: DecoratorStartToken, Content: "dec"},
+				&Token{Type: MapStartToken},
+				&Token{Type: WordToken, Content: "key"},
+				&Token{Type: MapKVDelimToken},
+				&Token{Type: WordToken, Content: "val"},
+				&Token{Type: MapEndToken},
+				&Token{Type: MapKVDelimToken},
+				&Token{Type: WordToken, Content: "val"},
+				&Token{Type: EOFToken},
+			},
+			nil,
+			true,
+		},
+
+		{
+			"decorator with map",
+			[]*Token{
+				&Token{Type: WordToken, Content: "key"},
+				&Token{Type: MapKVDelimToken},
+				&Token{Type: DecoratorStartToken, Content: "dec"},
+				&Token{Type: MapStartToken},
+				&Token{Type: WordToken, Content: "decKey"},
+				&Token{Type: MapKVDelimToken},
+				&Token{Type: WordToken, Content: "val"},
+				&Token{Type: MapEndToken},
+				&Token{Type: DecoratorEndToken},
+				&Token{Type: EOFToken},
+			},
+			&Map{
+				children: []Node{
+					&ValueNode{nodeType: WordType, val: "key"},
+					&Map{
+						children: []Node{
+							&ValueNode{nodeType: WordType, val: "decKey"},
+							&ValueNode{nodeType: WordType, val: "val"},
+						},
+						decorator: "dec",
+					},
+				},
+			},
+			false,
+		},
 	}
 
 	for _, test := range tests {
