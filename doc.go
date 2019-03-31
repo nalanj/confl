@@ -22,7 +22,7 @@ Here's an example that shows most of the features of confl.
 
 Parsing
 
-Documents parsed using `confl.Parse()`:
+Documents parsed using confl.Parse:
 
 	doc, err := confl.Parse(reader)
 
