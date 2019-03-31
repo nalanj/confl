@@ -11,8 +11,8 @@ const (
 	runeBOM rune = 0xFEFF
 )
 
-// Scanner is a scanner of Confl code
-type Scanner struct {
+// scanner is a scanner of Confl code
+type scanner struct {
 
 	// offset within the document
 	offset int
@@ -34,7 +34,7 @@ type Scanner struct {
 }
 
 // next returns the next character from the scanner
-func (s *Scanner) next() bool {
+func (s *scanner) next() bool {
 	if s.nextOffset < len(s.src) {
 		s.offset = s.nextOffset
 
@@ -64,13 +64,13 @@ func (s *Scanner) next() bool {
 	return true
 }
 
-// NewScanner returns a new scanner based on the given source
-func NewScanner(src []byte) *Scanner {
-	return &Scanner{src: src, peeked: []*Token{}}
+// newScanner returns a new scanner based on the given source
+func newScanner(src []byte) *scanner {
+	return &scanner{src: src, peeked: []*Token{}}
 }
 
 // Token returns the peeked token if it's there, or the next token
-func (s *Scanner) Token() *Token {
+func (s *scanner) Token() *Token {
 	var token *Token
 
 	if len(s.peeked) > 0 {
@@ -86,7 +86,7 @@ func (s *Scanner) Token() *Token {
 }
 
 // Peek returns up to count tokens, stopping on EOF if one is hit
-func (s *Scanner) Peek(count int) []*Token {
+func (s *scanner) Peek(count int) []*Token {
 	for i := 0; i < count; i++ {
 		var token *Token
 
@@ -106,7 +106,7 @@ func (s *Scanner) Peek(count int) []*Token {
 }
 
 // nextToken returns the next token, offset, and string content
-func (s *Scanner) nextToken() *Token {
+func (s *scanner) nextToken() *Token {
 	var token Token
 
 	// advance to the first character if at the beginning of the source
@@ -165,7 +165,7 @@ func (s *Scanner) nextToken() *Token {
 }
 
 // isWhitespace returns whether the current ch is whitespace
-func (s *Scanner) isWhitespace() bool {
+func (s *scanner) isWhitespace() bool {
 	if s.ch == ' ' || s.ch == '\r' || s.ch == '\n' || s.ch == '\t' {
 		return true
 	}
@@ -173,7 +173,7 @@ func (s *Scanner) isWhitespace() bool {
 }
 
 // isPunctuation notes if the current ch is one of the punctuation chars
-func (s *Scanner) isPunctuation() bool {
+func (s *scanner) isPunctuation() bool {
 	if s.ch == '{' || s.ch == '}' || s.ch == '[' || s.ch == ']' || s.ch == '=' ||
 		s.ch == '(' || s.ch == ')' || s.ch == '#' || s.ch == runeEOF {
 
@@ -183,22 +183,22 @@ func (s *Scanner) isPunctuation() bool {
 }
 
 // isDigit returns if the current ch is a digit
-func (s *Scanner) isDigit() bool {
+func (s *scanner) isDigit() bool {
 	return s.ch >= '0' && s.ch <= '9' || s.ch > utf8.RuneSelf && unicode.IsDigit(s.ch)
 }
 
 // isLetter returns if the current ch is a letter
-func (s *Scanner) isLetter() bool {
+func (s *scanner) isLetter() bool {
 	return s.ch >= 'a' && s.ch <= 'z' || s.ch >= 'A' && s.ch <= 'Z' || s.ch > utf8.RuneSelf && unicode.IsLetter(s.ch)
 }
 
 // isStringDelim returns true if the character is a string delimiter
-func (s *Scanner) isStringDelim() bool {
+func (s *scanner) isStringDelim() bool {
 	return s.ch == '"' || s.ch == '\''
 }
 
 // skipWhitespace reads through whitespace
-func (s *Scanner) skipWhitespace() bool {
+func (s *scanner) skipWhitespace() bool {
 	skipped := false
 
 	for s.isWhitespace() {
@@ -210,7 +210,7 @@ func (s *Scanner) skipWhitespace() bool {
 }
 
 // skipComment ignores a comment
-func (s *Scanner) skipComment() bool {
+func (s *scanner) skipComment() bool {
 	skipped := false
 
 	if s.ch == '#' {
@@ -225,7 +225,7 @@ func (s *Scanner) skipComment() bool {
 }
 
 // scanNumber scans numbers
-func (s *Scanner) scanNumber() (TokenType, string) {
+func (s *scanner) scanNumber() (TokenType, string) {
 	startOff := s.offset
 	seenDecimal := false
 
@@ -251,7 +251,7 @@ func (s *Scanner) scanNumber() (TokenType, string) {
 }
 
 // scanWord scans a word or a decorator
-func (s *Scanner) scanWord() (TokenType, string) {
+func (s *scanner) scanWord() (TokenType, string) {
 	startOff := s.offset
 
 	for !s.isPunctuation() && !s.isWhitespace() {
@@ -274,7 +274,7 @@ func (s *Scanner) scanWord() (TokenType, string) {
 }
 
 // scanString scans a string. Should be called on a string opening char
-func (s *Scanner) scanString() (TokenType, string) {
+func (s *scanner) scanString() (TokenType, string) {
 	delim := s.ch
 	startOff := s.offset
 	var content []byte

@@ -12,12 +12,12 @@ func Parse(r io.Reader) (Node, error) {
 		return nil, readErr
 	}
 
-	scan := NewScanner(src)
+	scan := newScanner(src)
 	return parseScanner(scan)
 }
 
 // parseScanner parses a document and returns an AST
-func parseScanner(scan *Scanner) (Node, error) {
+func parseScanner(scan *scanner) (Node, error) {
 	endDelim := EOFToken
 	peekedTokens := scan.Peek(1)
 
@@ -39,7 +39,7 @@ func parseScanner(scan *Scanner) (Node, error) {
 }
 
 // parseMap parses a map
-func parseMap(scan *Scanner, endDelim TokenType, decorator string) (*mapNode, error) {
+func parseMap(scan *scanner, endDelim TokenType, decorator string) (*mapNode, error) {
 	aMap := &mapNode{children: []Node{}, decorator: decorator}
 
 	for {
@@ -80,7 +80,7 @@ func parseMap(scan *Scanner, endDelim TokenType, decorator string) (*mapNode, er
 }
 
 // parseList parses and returns a list
-func parseList(scan *Scanner, decorator string) (*listNode, error) {
+func parseList(scan *scanner, decorator string) (*listNode, error) {
 	list := &listNode{children: []Node{}, decorator: decorator}
 	for {
 		// scan the next value
@@ -98,7 +98,7 @@ func parseList(scan *Scanner, decorator string) (*listNode, error) {
 
 // parseDecoratorContents parses the node in a decorator
 func parseDecoratorContents(
-	scan *Scanner,
+	scan *scanner,
 	mapKey bool,
 	decorator string,
 ) (Node, error) {
@@ -117,7 +117,7 @@ func parseDecoratorContents(
 // parseValue parses and returns a node for a value type, or an error if no
 // value type could be parsed. If the mapKey param is true then only those
 // types that are valid for a map key are allowed
-func parseValue(scan *Scanner, mapKey bool, closeType TokenType, decorator string) (Node, error) {
+func parseValue(scan *scanner, mapKey bool, closeType TokenType, decorator string) (Node, error) {
 
 	// read the value
 	token := scan.Token()

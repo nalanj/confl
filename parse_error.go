@@ -26,7 +26,7 @@ func (p *parseError) Error() string {
 
 // newParseError returns a new parse error based on the given msg, scanner, and
 // offset
-func newParseError(msg string, scan *Scanner, offset int) *parseError {
+func newParseError(msg string, scan *scanner, offset int) *parseError {
 	start := offset - 10
 	if start < 0 {
 		start = 0
