@@ -163,7 +163,7 @@ func TestParseScanner(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			scan := NewSrcScanner([]byte(test.src))
+			scan := NewScanner([]byte(test.src))
 			doc, err := parseScanner(scan)
 			assert.Equal(t, test.err, err != nil)
 			assert.Equal(t, test.doc, doc)
