@@ -6,25 +6,48 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestParser(t *testing.T) {
+// func ExampleParse() {
+// 	src := []byte(`
+// 		# a simple list of hosts and details
+// 		mail.confl.org={
+// 			purpose=mail
+// 			os=os([linux 4])
+// 			connects_to=[dc.confl.org]
+// 		}
+
+// 		dc.confl.org={
+// 			purpose=domain_controller
+// 			os=os([windows 10])
+// 		}
+
+// 		web.confl.org={
+// 			purpose=web_server
+// 			os=os([freebsd 12])
+// 			connects_to=[dc.confl.org mail.confl.org]
+// 		}
+// 		`)
+
+// 	doc, err := Parse(bytes.NewReader(src))
+// 	if err != nil {
+// 		panic(err)
+// 	}
+
+// 	fmt.Printf("%+v\n", doc)
+
+// 	// Output: blah
+// }
+
+func TestParseScanner(t *testing.T) {
 	tests := []struct {
-		name   string
-		tokens []*Token
-		doc    *Map
-		err    bool
+		name string
+		src  string
+		doc  *Map
+		err  bool
 	}{
 
 		{
 			"implicit document map",
-			[]*Token{
-				&Token{Type: WordToken, Content: "test"},
-				&Token{Type: MapKVDelimToken},
-				&Token{Type: NumberToken, Content: "23"},
-				&Token{Type: StringToken, Content: "also"},
-				&Token{Type: MapKVDelimToken},
-				&Token{Type: WordToken, Content: "this"},
-				&Token{Type: EOFToken},
-			},
+			`test=23 "also"=this`,
 			&Map{
 				children: []Node{
 					&ValueNode{nodeType: WordType, val: "test"},
@@ -38,33 +61,14 @@ func TestParser(t *testing.T) {
 
 		{
 			"implicit document map, illegal end token",
-			[]*Token{
-				&Token{Type: WordToken, Content: "test"},
-				&Token{Type: MapKVDelimToken},
-				&Token{Type: NumberToken, Content: "23"},
-				&Token{Type: StringToken, Content: "also"},
-				&Token{Type: MapKVDelimToken},
-				&Token{Type: WordToken, Content: "this"},
-				&Token{Type: MapEndToken},
-				&Token{Type: EOFToken},
-			},
+			`test=23 "also"="this"}`,
 			nil,
 			true,
 		},
 
 		{
 			"explicit document map",
-			[]*Token{
-				&Token{Type: MapStartToken},
-				&Token{Type: WordToken, Content: "test"},
-				&Token{Type: MapKVDelimToken},
-				&Token{Type: NumberToken, Content: "23"},
-				&Token{Type: StringToken, Content: "also"},
-				&Token{Type: MapKVDelimToken},
-				&Token{Type: WordToken, Content: "this"},
-				&Token{Type: MapEndToken},
-				&Token{Type: EOFToken},
-			},
+			`{test=23 "also"=this}`,
 			&Map{
 				children: []Node{
 					&ValueNode{nodeType: WordType, val: "test"},
@@ -78,32 +82,14 @@ func TestParser(t *testing.T) {
 
 		{
 			"explicit document map, illegal end token",
-			[]*Token{
-				&Token{Type: MapStartToken},
-				&Token{Type: WordToken, Content: "test"},
-				&Token{Type: MapKVDelimToken},
-				&Token{Type: NumberToken, Content: "23"},
-				&Token{Type: StringToken, Content: "also"},
-				&Token{Type: MapKVDelimToken},
-				&Token{Type: WordToken, Content: "this"},
-				&Token{Type: EOFToken},
-			},
+			`{test=23 "also"=this`,
 			nil,
 			true,
 		},
 
 		{
 			"nested map",
-			[]*Token{
-				&Token{Type: WordToken, Content: "map"},
-				&Token{Type: MapKVDelimToken},
-				&Token{Type: MapStartToken},
-				&Token{Type: WordToken, Content: "key"},
-				&Token{Type: MapKVDelimToken},
-				&Token{Type: WordToken, Content: "value"},
-				&Token{Type: MapEndToken},
-				&Token{Type: EOFToken},
-			},
+			`map={key=value}`,
 			&Map{
 				children: []Node{
 					&ValueNode{nodeType: WordType, val: "map"},
@@ -120,15 +106,7 @@ func TestParser(t *testing.T) {
 
 		{
 			"nested list",
-			[]*Token{
-				&Token{Type: WordToken, Content: "list"},
-				&Token{Type: MapKVDelimToken},
-				&Token{Type: ListStartToken},
-				&Token{Type: WordToken, Content: "item1"},
-				&Token{Type: WordToken, Content: "item2"},
-				&Token{Type: ListEndToken},
-				&Token{Type: EOFToken},
-			},
+			`list=[item1 item2]`,
 			&Map{
 				children: []Node{
 					&ValueNode{nodeType: WordType, val: "list"},
@@ -145,17 +123,7 @@ func TestParser(t *testing.T) {
 
 		{
 			"simple decorator",
-			[]*Token{
-				&Token{Type: DecoratorStartToken, Content: "dec"},
-				&Token{Type: WordToken, Content: "test"},
-				&Token{Type: DecoratorEndToken},
-				&Token{Type: MapKVDelimToken},
-				&Token{Type: NumberToken, Content: "23"},
-				&Token{Type: StringToken, Content: "also"},
-				&Token{Type: MapKVDelimToken},
-				&Token{Type: WordToken, Content: "this"},
-				&Token{Type: EOFToken},
-			},
+			`dec(test)=23 "also"=this`,
 			&Map{
 				children: []Node{
 					&ValueNode{nodeType: WordType, val: "test", decorator: "dec"},
@@ -169,35 +137,14 @@ func TestParser(t *testing.T) {
 
 		{
 			"decorator on list as map key errors",
-			[]*Token{
-				&Token{Type: DecoratorStartToken, Content: "dec"},
-				&Token{Type: MapStartToken},
-				&Token{Type: WordToken, Content: "key"},
-				&Token{Type: MapKVDelimToken},
-				&Token{Type: WordToken, Content: "val"},
-				&Token{Type: MapEndToken},
-				&Token{Type: MapKVDelimToken},
-				&Token{Type: WordToken, Content: "val"},
-				&Token{Type: EOFToken},
-			},
+			`dec({key=val})=val`,
 			nil,
 			true,
 		},
 
 		{
 			"decorator with map",
-			[]*Token{
-				&Token{Type: WordToken, Content: "key"},
-				&Token{Type: MapKVDelimToken},
-				&Token{Type: DecoratorStartToken, Content: "dec"},
-				&Token{Type: MapStartToken},
-				&Token{Type: WordToken, Content: "decKey"},
-				&Token{Type: MapKVDelimToken},
-				&Token{Type: WordToken, Content: "val"},
-				&Token{Type: MapEndToken},
-				&Token{Type: DecoratorEndToken},
-				&Token{Type: EOFToken},
-			},
+			`key=dec({decKey=val})`,
 			&Map{
 				children: []Node{
 					&ValueNode{nodeType: WordType, val: "key"},
@@ -216,7 +163,7 @@ func TestParser(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			scan := &mockScanner{tokens: test.tokens}
+			scan := NewSrcScanner([]byte(test.src))
 			doc, err := parseScanner(scan)
 			assert.Equal(t, test.err, err != nil)
 			assert.Equal(t, test.doc, doc)
