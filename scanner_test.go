@@ -81,11 +81,11 @@ func TestScan(t *testing.T) {
 		},
 		{
 			"comment",
-			[]byte("word # comment\nword"),
+			[]byte("# comment\nword"),
 			[]TokenType{
-				WordToken, WordToken, EOFToken,
+				WordToken, EOFToken,
 			},
-			[]string{"word", "word", ""},
+			[]string{"word", ""},
 		},
 		{
 			"simple string with double quote",

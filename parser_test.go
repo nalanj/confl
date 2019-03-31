@@ -1,41 +1,43 @@
 package confl
 
 import (
+	"bytes"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-// func ExampleParse() {
-// 	src := []byte(`
-// 		# a simple list of hosts and details
-// 		mail.confl.org={
-// 			purpose=mail
-// 			os=os([linux 4])
-// 			connects_to=[dc.confl.org]
-// 		}
+func ExampleParse() {
+	src := []byte(`
+		# a simple list of hosts and details
+		mail.confl.org={
+			purpose=mail
+			os=os([linux 4])
+			connects_to=[dc.confl.org]
+		}
 
-// 		dc.confl.org={
-// 			purpose=domain_controller
-// 			os=os([windows 10])
-// 		}
+		dc.confl.org={
+			purpose=domain_controller
+			os=os([windows 10])
+		}
 
-// 		web.confl.org={
-// 			purpose=web_server
-// 			os=os([freebsd 12])
-// 			connects_to=[dc.confl.org mail.confl.org]
-// 		}
-// 		`)
+		web.confl.org={
+			purpose=web_server
+			os=os([freebsd 12])
+			connects_to=[dc.confl.org mail.confl.org]
+		}
+		`)
 
-// 	doc, err := Parse(bytes.NewReader(src))
-// 	if err != nil {
-// 		panic(err)
-// 	}
+	doc, err := Parse(bytes.NewReader(src))
+	if err != nil {
+		panic(err)
+	}
 
-// 	fmt.Printf("%+v\n", doc)
+	fmt.Println(len(doc.Children()))
 
-// 	// Output: blah
-// }
+	// Output: 6
+}
 
 func TestParseScanner(t *testing.T) {
 	tests := []struct {

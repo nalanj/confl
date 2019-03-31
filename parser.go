@@ -22,9 +22,7 @@ func parseScanner(scan *Scanner) (*Map, error) {
 	peekedTokens := scan.Peek(1)
 
 	if len(peekedTokens) != 1 {
-		return nil, &parseError{
-			msg: "Empty document",
-		}
+		return nil, newParseError("Empty document", scan, 0)
 	}
 
 	startToken := peekedTokens[0]
@@ -57,9 +55,11 @@ func parseMap(scan *Scanner, endDelim TokenType, decorator string) (*Map, error)
 		// read the delimiter
 		delimToken := scan.Token()
 		if delimToken.Type != MapKVDelimToken {
-			return nil, &parseError{
-				msg: "Illegal token, expected map delimiter `=`",
-			}
+			return nil, newParseError(
+				"Illegal token, expected map delimiter `=`",
+				scan,
+				delimToken.Offset,
+			)
 		}
 
 		// read and append the value
@@ -68,9 +68,11 @@ func parseMap(scan *Scanner, endDelim TokenType, decorator string) (*Map, error)
 			return nil, valErr
 		}
 		if valNode == nil {
-			return nil, &parseError{
-				msg: "Illegal token, expected map value, got EOF",
-			}
+			return nil, newParseError(
+				"Illegal token, expected map value, got EOF",
+				scan,
+				len(scan.src),
+			)
 		}
 
 		aMap.children = append(aMap.children, keyNode, valNode)
@@ -82,7 +84,7 @@ func parseList(scan *Scanner, decorator string) (*List, error) {
 	list := &List{children: []Node{}, decorator: decorator}
 	for {
 		// scan the next value
-		node, err := parseValue(scan, true, ListEndToken, "")
+		node, err := parseValue(scan, false, ListEndToken, "")
 		if err != nil {
 			return nil, err
 		}
@@ -148,8 +150,10 @@ func parseValue(scan *Scanner, mapKey bool, closeType TokenType, decorator strin
 	case token.Type == ListStartToken && !mapKey:
 		return parseList(scan, decorator)
 	default:
-		return nil, &parseError{
-			msg: "Illegal token",
-		}
+		return nil, newParseError(
+			"Illegal token",
+			scan,
+			token.Offset,
+		)
 	}
 }
