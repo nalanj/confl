@@ -43,14 +43,14 @@ func TestParseScanner(t *testing.T) {
 	tests := []struct {
 		name string
 		src  string
-		doc  *Map
+		doc  *mapNode
 		err  bool
 	}{
 
 		{
 			"implicit document map",
 			`test=23 "also"=this`,
-			&Map{
+			&mapNode{
 				children: []Node{
 					&ValueNode{nodeType: WordType, val: "test"},
 					&ValueNode{nodeType: NumberType, val: "23"},
@@ -71,7 +71,7 @@ func TestParseScanner(t *testing.T) {
 		{
 			"explicit document map",
 			`{test=23 "also"=this}`,
-			&Map{
+			&mapNode{
 				children: []Node{
 					&ValueNode{nodeType: WordType, val: "test"},
 					&ValueNode{nodeType: NumberType, val: "23"},
@@ -92,10 +92,10 @@ func TestParseScanner(t *testing.T) {
 		{
 			"nested map",
 			`map={key=value}`,
-			&Map{
+			&mapNode{
 				children: []Node{
 					&ValueNode{nodeType: WordType, val: "map"},
-					&Map{
+					&mapNode{
 						children: []Node{
 							&ValueNode{nodeType: WordType, val: "key"},
 							&ValueNode{nodeType: WordType, val: "value"},
@@ -109,10 +109,10 @@ func TestParseScanner(t *testing.T) {
 		{
 			"nested list",
 			`list=[item1 item2]`,
-			&Map{
+			&mapNode{
 				children: []Node{
 					&ValueNode{nodeType: WordType, val: "list"},
-					&List{
+					&listNode{
 						children: []Node{
 							&ValueNode{nodeType: WordType, val: "item1"},
 							&ValueNode{nodeType: WordType, val: "item2"},
@@ -126,7 +126,7 @@ func TestParseScanner(t *testing.T) {
 		{
 			"simple decorator",
 			`dec(test)=23 "also"=this`,
-			&Map{
+			&mapNode{
 				children: []Node{
 					&ValueNode{nodeType: WordType, val: "test", decorator: "dec"},
 					&ValueNode{nodeType: NumberType, val: "23"},
@@ -147,10 +147,10 @@ func TestParseScanner(t *testing.T) {
 		{
 			"decorator with map",
 			`key=dec({decKey=val})`,
-			&Map{
+			&mapNode{
 				children: []Node{
 					&ValueNode{nodeType: WordType, val: "key"},
-					&Map{
+					&mapNode{
 						children: []Node{
 							&ValueNode{nodeType: WordType, val: "decKey"},
 							&ValueNode{nodeType: WordType, val: "val"},

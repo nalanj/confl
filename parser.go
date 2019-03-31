@@ -6,7 +6,7 @@ import (
 )
 
 // Parse scans and parses from a reader
-func Parse(r io.Reader) (*Map, error) {
+func Parse(r io.Reader) (Node, error) {
 	src, readErr := ioutil.ReadAll(r)
 	if readErr != nil {
 		return nil, readErr
@@ -17,7 +17,7 @@ func Parse(r io.Reader) (*Map, error) {
 }
 
 // parseScanner parses a document and returns an AST
-func parseScanner(scan *Scanner) (*Map, error) {
+func parseScanner(scan *Scanner) (Node, error) {
 	endDelim := EOFToken
 	peekedTokens := scan.Peek(1)
 
@@ -27,7 +27,7 @@ func parseScanner(scan *Scanner) (*Map, error) {
 
 	startToken := peekedTokens[0]
 	if startToken.Type == EOFToken {
-		return &Map{children: []Node{}}, nil
+		return &mapNode{children: []Node{}}, nil
 	}
 
 	if startToken.Type == MapStartToken {
@@ -39,8 +39,8 @@ func parseScanner(scan *Scanner) (*Map, error) {
 }
 
 // parseMap parses a map
-func parseMap(scan *Scanner, endDelim TokenType, decorator string) (*Map, error) {
-	aMap := &Map{children: []Node{}, decorator: decorator}
+func parseMap(scan *Scanner, endDelim TokenType, decorator string) (*mapNode, error) {
+	aMap := &mapNode{children: []Node{}, decorator: decorator}
 
 	for {
 		// scan the key
@@ -80,8 +80,8 @@ func parseMap(scan *Scanner, endDelim TokenType, decorator string) (*Map, error)
 }
 
 // parseList parses and returns a list
-func parseList(scan *Scanner, decorator string) (*List, error) {
-	list := &List{children: []Node{}, decorator: decorator}
+func parseList(scan *Scanner, decorator string) (*listNode, error) {
+	list := &listNode{children: []Node{}, decorator: decorator}
 	for {
 		// scan the next value
 		node, err := parseValue(scan, false, ListEndToken, "")
