@@ -1,7 +1,23 @@
 package confl
 
-// parse parses a document and returns an AST
-func parse(scan Scanner) (*Map, error) {
+import (
+	"io"
+	"io/ioutil"
+)
+
+// Parse scans and parses from a reader
+func Parse(r io.Reader) (*Map, error) {
+	src, readErr := ioutil.ReadAll(r)
+	if readErr != nil {
+		return nil, readErr
+	}
+
+	scan := NewSrcScanner(src)
+	return parseScanner(scan)
+}
+
+// parseScanner parses a document and returns an AST
+func parseScanner(scan Scanner) (*Map, error) {
 	endDelim := EOFToken
 	peekedTokens := scan.Peek(1)
 

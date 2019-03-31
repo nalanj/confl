@@ -217,7 +217,7 @@ func TestParser(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			scan := &mockScanner{tokens: test.tokens}
-			doc, err := parse(scan)
+			doc, err := parseScanner(scan)
 			assert.Equal(t, test.err, err != nil)
 			assert.Equal(t, test.doc, doc)
 		})
