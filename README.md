@@ -1,3 +1,5 @@
+[![GoDoc](https://img.shields.io/badge/godoc-reference-5272B4.svg?style=for-the-badge)](https://godoc.org/github.com/nalanj/confl)
+
 # confl
 
 Confl is a simple description language. It's related to languages like YAML,
