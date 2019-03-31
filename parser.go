@@ -1,7 +1,7 @@
 package confl
 
-// Parse parses a document and returns an AST
-func Parse(scan Scanner) (*Map, error) {
+// parse parses a document and returns an AST
+func parse(scan Scanner) (*Map, error) {
 	endDelim := EOFToken
 	peekedTokens := scan.Peek(1)
 
