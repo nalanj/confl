@@ -126,13 +126,13 @@ func parseValue(scan *scanner, mapKey bool, closeType tokenType, decorator strin
 	case token.Type == closeType:
 		return nil, nil
 	case token.Type == wordToken:
-		return &ValueNode{
+		return &valueNode{
 			nodeType:  WordType,
 			val:       token.Content,
 			decorator: decorator,
 		}, nil
 	case token.Type == stringToken:
-		return &ValueNode{
+		return &valueNode{
 			nodeType:  StringType,
 			val:       token.Content,
 			decorator: decorator,
@@ -140,7 +140,7 @@ func parseValue(scan *scanner, mapKey bool, closeType tokenType, decorator strin
 	case token.Type == decoratorStartToken:
 		return parseDecoratorContents(scan, mapKey, token.Content)
 	case token.Type == numberToken && !mapKey:
-		return &ValueNode{
+		return &valueNode{
 			nodeType:  NumberType,
 			val:       token.Content,
 			decorator: decorator,

@@ -52,10 +52,10 @@ func TestParseScanner(t *testing.T) {
 			`test=23 "also"=this`,
 			&mapNode{
 				children: []Node{
-					&ValueNode{nodeType: WordType, val: "test"},
-					&ValueNode{nodeType: NumberType, val: "23"},
-					&ValueNode{nodeType: StringType, val: "also"},
-					&ValueNode{nodeType: WordType, val: "this"},
+					&valueNode{nodeType: WordType, val: "test"},
+					&valueNode{nodeType: NumberType, val: "23"},
+					&valueNode{nodeType: StringType, val: "also"},
+					&valueNode{nodeType: WordType, val: "this"},
 				},
 			},
 			false,
@@ -73,10 +73,10 @@ func TestParseScanner(t *testing.T) {
 			`{test=23 "also"=this}`,
 			&mapNode{
 				children: []Node{
-					&ValueNode{nodeType: WordType, val: "test"},
-					&ValueNode{nodeType: NumberType, val: "23"},
-					&ValueNode{nodeType: StringType, val: "also"},
-					&ValueNode{nodeType: WordType, val: "this"},
+					&valueNode{nodeType: WordType, val: "test"},
+					&valueNode{nodeType: NumberType, val: "23"},
+					&valueNode{nodeType: StringType, val: "also"},
+					&valueNode{nodeType: WordType, val: "this"},
 				},
 			},
 			false,
@@ -94,11 +94,11 @@ func TestParseScanner(t *testing.T) {
 			`map={key=value}`,
 			&mapNode{
 				children: []Node{
-					&ValueNode{nodeType: WordType, val: "map"},
+					&valueNode{nodeType: WordType, val: "map"},
 					&mapNode{
 						children: []Node{
-							&ValueNode{nodeType: WordType, val: "key"},
-							&ValueNode{nodeType: WordType, val: "value"},
+							&valueNode{nodeType: WordType, val: "key"},
+							&valueNode{nodeType: WordType, val: "value"},
 						},
 					},
 				},
@@ -111,11 +111,11 @@ func TestParseScanner(t *testing.T) {
 			`list=[item1 item2]`,
 			&mapNode{
 				children: []Node{
-					&ValueNode{nodeType: WordType, val: "list"},
+					&valueNode{nodeType: WordType, val: "list"},
 					&listNode{
 						children: []Node{
-							&ValueNode{nodeType: WordType, val: "item1"},
-							&ValueNode{nodeType: WordType, val: "item2"},
+							&valueNode{nodeType: WordType, val: "item1"},
+							&valueNode{nodeType: WordType, val: "item2"},
 						},
 					},
 				},
@@ -128,10 +128,10 @@ func TestParseScanner(t *testing.T) {
 			`dec(test)=23 "also"=this`,
 			&mapNode{
 				children: []Node{
-					&ValueNode{nodeType: WordType, val: "test", decorator: "dec"},
-					&ValueNode{nodeType: NumberType, val: "23"},
-					&ValueNode{nodeType: StringType, val: "also"},
-					&ValueNode{nodeType: WordType, val: "this"},
+					&valueNode{nodeType: WordType, val: "test", decorator: "dec"},
+					&valueNode{nodeType: NumberType, val: "23"},
+					&valueNode{nodeType: StringType, val: "also"},
+					&valueNode{nodeType: WordType, val: "this"},
 				},
 			},
 			false,
@@ -149,11 +149,11 @@ func TestParseScanner(t *testing.T) {
 			`key=dec({decKey=val})`,
 			&mapNode{
 				children: []Node{
-					&ValueNode{nodeType: WordType, val: "key"},
+					&valueNode{nodeType: WordType, val: "key"},
 					&mapNode{
 						children: []Node{
-							&ValueNode{nodeType: WordType, val: "decKey"},
-							&ValueNode{nodeType: WordType, val: "val"},
+							&valueNode{nodeType: WordType, val: "decKey"},
+							&valueNode{nodeType: WordType, val: "val"},
 						},
 						decorator: "dec",
 					},
