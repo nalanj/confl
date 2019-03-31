@@ -1,9 +1,8 @@
-package confl
-
 /*
-Confl is a simple description language. It's related to languages like YAML,
-JSON, and TOML. The focus with Confl is to keep the syntax as simple as
-possible while also achieving a high amount of expressiveness.
+Package confl implements a simple description language. It's related to
+languages like YAML, JSON, and TOML. The focus with Confl is to keep the
+syntax as simple as possible while also achieving a high amount of
+expressiveness.
 
 ## Example Document
 
@@ -28,3 +27,4 @@ It can be parsed using `confl.Parse()`:
 
 All confl documents are maps at their root.
 */
+package confl
