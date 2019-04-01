@@ -55,6 +55,12 @@ func newParseError(msg string, scan *scanner, tok *token) *parseError {
 	if start < 0 {
 		start = 0
 	}
+
+	// if the offset wraps lines, just go with the last line
+	if offset < start {
+		offset = start
+	}
+
 	end := offset + length + 20
 	if end > len(scan.src) {
 		end = len(scan.src)
