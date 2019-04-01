@@ -1,6 +1,7 @@
 package confl
 
 import (
+	"fmt"
 	"io"
 	"io/ioutil"
 )
@@ -22,7 +23,7 @@ func parseScanner(scan *scanner) (Node, error) {
 	peekedTokens := scan.Peek(1)
 
 	if len(peekedTokens) != 1 {
-		return nil, newParseError("Empty document", scan, 0)
+		return nil, newParseError("Empty document", scan, 0, 0)
 	}
 
 	startToken := peekedTokens[0]
@@ -59,6 +60,7 @@ func parseMap(scan *scanner, endDelim tokenType, decorator string) (*mapNode, er
 				"Illegal token, expected map delimiter `=`",
 				scan,
 				delimToken.Offset,
+				len(delimToken.Content),
 			)
 		}
 
@@ -72,6 +74,7 @@ func parseMap(scan *scanner, endDelim tokenType, decorator string) (*mapNode, er
 				"Illegal token, expected map value, got EOF",
 				scan,
 				len(scan.src),
+				0,
 			)
 		}
 
@@ -125,6 +128,17 @@ func parseValue(scan *scanner, mapKey bool, closeType tokenType, decorator strin
 	switch {
 	case token.Type == closeType:
 		return nil, nil
+	case token.Type == mapEndToken || token.Type == listEndToken || token.Type == decoratorEndToken || token.Type == eofToken:
+		return nil, newParseError(
+			fmt.Sprintf(
+				"Illegal closing token: got %s, expected %s",
+				token.Type,
+				closeType,
+			),
+			scan,
+			token.Offset,
+			len(token.Content),
+		)
 	case token.Type == wordToken:
 		return &valueNode{
 			nodeType:  WordType,
@@ -139,21 +153,48 @@ func parseValue(scan *scanner, mapKey bool, closeType tokenType, decorator strin
 		}, nil
 	case token.Type == decoratorStartToken:
 		return parseDecoratorContents(scan, mapKey, token.Content)
-	case token.Type == numberToken && !mapKey:
+	case token.Type == numberToken:
+		if mapKey {
+			return nil, newParseError(
+				"Numbers aren't allowed as map keys",
+				scan,
+				token.Offset,
+				len(token.Content),
+			)
+		}
+
 		return &valueNode{
 			nodeType:  NumberType,
 			val:       token.Content,
 			decorator: decorator,
 		}, nil
-	case token.Type == mapStartToken && !mapKey:
+	case token.Type == mapStartToken:
+		if mapKey {
+			return nil, newParseError(
+				"Maps aren't allowed as map keys",
+				scan,
+				token.Offset,
+				len(token.Content),
+			)
+		}
 		return parseMap(scan, mapEndToken, decorator)
 	case token.Type == listStartToken && !mapKey:
+		if mapKey {
+			return nil, newParseError(
+				"Lists aren't allowed as map keys",
+				scan,
+				token.Offset,
+				len(token.Content),
+			)
+		}
+
 		return parseList(scan, decorator)
 	default:
 		return nil, newParseError(
 			"Illegal token",
 			scan,
 			token.Offset,
+			len(token.Content),
 		)
 	}
 }

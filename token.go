@@ -41,6 +41,22 @@ const (
 	decoratorEndToken
 )
 
+// typeString converts a token type to a string
+func (t tokenType) String() string {
+	switch t {
+	case decoratorEndToken:
+		return ")"
+	case listEndToken:
+		return "]"
+	case mapEndToken:
+		return "}"
+	case eofToken:
+		return "EOF"
+	default:
+		panic("Cannot convert token type")
+	}
+}
+
 // token is a token from the scanner
 type token struct {
 

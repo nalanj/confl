@@ -63,7 +63,7 @@ func TestParseScanner(t *testing.T) {
 
 		{
 			"implicit document map, illegal end token",
-			`test=23 "also"="this"}`,
+			`test=23 "also"=this}`,
 			nil,
 			true,
 		},
@@ -168,6 +168,11 @@ func TestParseScanner(t *testing.T) {
 			scan := newScanner([]byte(test.src))
 			doc, err := parseScanner(scan)
 			assert.Equal(t, test.err, err != nil)
+
+			if err != nil {
+				fmt.Println(err)
+			}
+
 			assert.Equal(t, test.doc, doc)
 		})
 	}

@@ -120,7 +120,7 @@ func (s *scanner) nextToken() *token {
 	for s.skipWhitespace() || s.skipComment() {
 	}
 
-	offset := s.offset
+	token.Offset = s.offset
 	advance := false
 
 	switch {
@@ -157,7 +157,7 @@ func (s *scanner) nextToken() *token {
 	if advance {
 		if !s.next() {
 			token.Type = illegalToken
-			token.Content = string(s.src[offset:s.nextOffset])
+			token.Content = string(s.src[token.Offset:s.nextOffset])
 		}
 	}
 
