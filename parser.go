@@ -23,7 +23,7 @@ func parseScanner(scan *scanner) (Node, error) {
 	peekedTokens := scan.Peek(1)
 
 	if len(peekedTokens) != 1 {
-		return nil, newParseError("Empty document", scan, 0, 0)
+		return nil, newParseError("Empty document", scan, &token{})
 	}
 
 	startToken := peekedTokens[0]
@@ -59,8 +59,7 @@ func parseMap(scan *scanner, endDelim tokenType, decorator string) (*mapNode, er
 			return nil, newParseError(
 				"Illegal token, expected map delimiter `=`",
 				scan,
-				delimToken.Offset,
-				len(delimToken.Content),
+				delimToken,
 			)
 		}
 
@@ -73,8 +72,7 @@ func parseMap(scan *scanner, endDelim tokenType, decorator string) (*mapNode, er
 			return nil, newParseError(
 				"Illegal token, expected map value, got EOF",
 				scan,
-				len(scan.src),
-				0,
+				&token{Content: "", Offset: len(scan.src)},
 			)
 		}
 
@@ -136,8 +134,7 @@ func parseValue(scan *scanner, mapKey bool, closeType tokenType, decorator strin
 				closeType,
 			),
 			scan,
-			token.Offset,
-			len(token.Content),
+			token,
 		)
 	case token.Type == wordToken:
 		return &valueNode{
@@ -158,8 +155,7 @@ func parseValue(scan *scanner, mapKey bool, closeType tokenType, decorator strin
 			return nil, newParseError(
 				"Numbers aren't allowed as map keys",
 				scan,
-				token.Offset,
-				len(token.Content),
+				token,
 			)
 		}
 
@@ -173,8 +169,7 @@ func parseValue(scan *scanner, mapKey bool, closeType tokenType, decorator strin
 			return nil, newParseError(
 				"Maps aren't allowed as map keys",
 				scan,
-				token.Offset,
-				len(token.Content),
+				token,
 			)
 		}
 		return parseMap(scan, mapEndToken, decorator)
@@ -183,8 +178,7 @@ func parseValue(scan *scanner, mapKey bool, closeType tokenType, decorator strin
 			return nil, newParseError(
 				"Lists aren't allowed as map keys",
 				scan,
-				token.Offset,
-				len(token.Content),
+				token,
 			)
 		}
 
@@ -193,8 +187,7 @@ func parseValue(scan *scanner, mapKey bool, closeType tokenType, decorator strin
 		return nil, newParseError(
 			"Illegal token",
 			scan,
-			token.Offset,
-			len(token.Content),
+			token,
 		)
 	}
 }

@@ -20,20 +20,25 @@ type parseError struct {
 
 	// length is the length of the token where the error happened
 	length int
+
+	// line is the line for the error
+	line int
 }
 
 // Error returns the full error message
 func (p *parseError) Error() string {
 	focusEnd := p.offset + p.length
 
+	line := fmt.Sprintf("Line %d: ", p.line)
 	pre := string(p.src[0:p.offset])
 	focus := string(p.src[p.offset:focusEnd])
 	post := string(p.src[focusEnd:len(p.src)])
 
 	return fmt.Sprintf(
-		"%s\n%s%s%s\n%s%s%s\n",
+		"%s\n%s%s%s%s\n%s%s%s%s\n",
 		p.msg,
-		pre, focus, post,
+		line, pre, focus, post,
+		strings.Repeat(" ", utf8.RuneCountInString(line)),
 		strings.Repeat(" ", utf8.RuneCountInString(pre)),
 		strings.Repeat("^", utf8.RuneCountInString(focus)),
 		strings.Repeat(" ", utf8.RuneCountInString(post)),
@@ -42,12 +47,14 @@ func (p *parseError) Error() string {
 
 // newParseError returns a new parse error based on the given msg, scanner, and
 // offset
-func newParseError(msg string, scan *scanner, offset int, length int) *parseError {
-	start := offset - 10
+func newParseError(msg string, scan *scanner, tok *token) *parseError {
+	offset := tok.Offset
+	length := len(tok.Content)
+
+	start := scan.lineStart
 	if start < 0 {
 		start = 0
 	}
-
 	end := offset + length + 20
 	if end > len(scan.src) {
 		end = len(scan.src)
@@ -74,5 +81,6 @@ func newParseError(msg string, scan *scanner, offset int, length int) *parseErro
 		src:    src,
 		offset: offset - start,
 		length: length,
+		line:   scan.line,
 	}
 }

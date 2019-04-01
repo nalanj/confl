@@ -29,6 +29,12 @@ type scanner struct {
 	// err is the current error
 	err error
 
+	// line is the current line number
+	line int
+
+	// lineStart is the offset where the line started
+	lineStart int
+
 	// peeked is the set of peeked tokens
 	peeked []*token
 }
@@ -36,6 +42,11 @@ type scanner struct {
 // next returns the next character from the scanner
 func (s *scanner) next() bool {
 	if s.nextOffset < len(s.src) {
+		if s.ch == '\n' {
+			s.line++
+			s.lineStart = s.nextOffset
+		}
+
 		s.offset = s.nextOffset
 
 		r, w := rune(s.src[s.offset]), 1
@@ -66,7 +77,7 @@ func (s *scanner) next() bool {
 
 // newScanner returns a new scanner based on the given source
 func newScanner(src []byte) *scanner {
-	return &scanner{src: src, peeked: []*token{}}
+	return &scanner{src: src, peeked: []*token{}, line: 1}
 }
 
 // Token returns the peeked token if it's there, or the next token

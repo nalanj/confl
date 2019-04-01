@@ -168,11 +168,6 @@ func TestParseScanner(t *testing.T) {
 			scan := newScanner([]byte(test.src))
 			doc, err := parseScanner(scan)
 			assert.Equal(t, test.err, err != nil)
-
-			if err != nil {
-				fmt.Println(err)
-			}
-
 			assert.Equal(t, test.doc, doc)
 		})
 	}
