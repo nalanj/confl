@@ -24,7 +24,7 @@ device(wifi0)={
 }
 ```
 
-## The Tokens
+## The Format
 
 ### Numbers
 
@@ -137,6 +137,14 @@ decorator(12)
 
 A decorator can contain any other type, so long as the type would be valid in
 that context without a decorator as well.
+
+## Parsing
+
+Parse a document with the `Parse function`:
+
+```
+doc, err := confl.Parse(reader)
+```
 
 ## Errors
 

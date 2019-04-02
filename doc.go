@@ -37,8 +37,6 @@ and location of the error. For example:
 
 	Illegal closing token: got }, expected EOF
 	Line 1: test=23 "also"=this}
-                           ^
-
 
 */
 package confl
