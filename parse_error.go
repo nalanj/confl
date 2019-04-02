@@ -6,8 +6,8 @@ import (
 	"unicode/utf8"
 )
 
-// parseError represents an error while parsing
-type parseError struct {
+// ParseError represents an error while parsing
+type ParseError struct {
 
 	// msg is the error message
 	msg string
@@ -25,8 +25,14 @@ type parseError struct {
 	line int
 }
 
-// Error returns the full error message
-func (p *parseError) Error() string {
+// Error returns the error message
+func (p *ParseError) Error() string {
+	return p.msg
+}
+
+// ErrorWithCode returns a multi-line formatted version of the error including
+// the code where the error occurred.
+func (p *ParseError) ErrorWithCode() string {
 	focusEnd := p.offset + p.length
 
 	line := fmt.Sprintf("Line %d: ", p.line)
@@ -47,7 +53,7 @@ func (p *parseError) Error() string {
 
 // newParseError returns a new parse error based on the given msg, scanner, and
 // offset
-func newParseError(msg string, scan *scanner, tok *token) *parseError {
+func newParseError(msg string, scan *scanner, tok *token) *ParseError {
 	offset := tok.Offset
 	length := len(tok.Content)
 
@@ -82,7 +88,7 @@ func newParseError(msg string, scan *scanner, tok *token) *parseError {
 		length = 5
 	}
 
-	return &parseError{
+	return &ParseError{
 		msg:    msg,
 		src:    src,
 		offset: offset - start,

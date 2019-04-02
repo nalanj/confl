@@ -137,3 +137,17 @@ decorator(12)
 
 A decorator can contain any other type, so long as the type would be valid in
 that context without a decorator as well.
+
+## Errors
+
+Confl tries to do a good job with showing errors. The `Error()` function for n
+`ParseError` simply returns the error message for the error, but there is an
+additional `ErrorWithCode` function that includes information about the line
+and location of the error. For example:
+
+```
+Illegal closing token: got }, expected EOF
+Line 1: test=23 "also"=this}
+                           ^
+```
+

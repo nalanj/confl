@@ -27,5 +27,18 @@ Documents parsed using confl.Parse:
 	doc, err := confl.Parse(reader)
 
 Confl documents are always maps at their root.
+
+Errors
+
+Confl tries to do a good job with showing errors. The Error function for a
+ParseError simply returns the error message for the error, but there is an
+additional ErrorWithCode function that includes information about the line
+and location of the error. For example:
+
+	Illegal closing token: got }, expected EOF
+	Line 1: test=23 "also"=this}
+                           ^
+
+
 */
 package confl
