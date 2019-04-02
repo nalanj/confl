@@ -94,20 +94,15 @@ spread across multiple lines. Maps are surrounded by curly `{}` braces.
 Map keys must be words or strings.
 
 ```
-{key=value "another key"="another value" number=12 map={another=map}}
+map={nested=map}
 
-{
-  key=value
-  "another key"="another value"
-  number=12
-  map = {
-    another=map
-  }
+another_map = {
+  another=map
 }
 ```
 
-All Confl documents are maps at the document level, so the curly braces can be
-excluded in that case.
+All Confl documents are maps at the document level, so document level maps
+exclude the curly braces.
 
 ### Lists
 

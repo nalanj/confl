@@ -26,6 +26,6 @@ Documents parsed using confl.Parse:
 
 	doc, err := confl.Parse(reader)
 
-All confl documents are maps at their root.
+Confl documents are always maps at their root.
 */
 package confl

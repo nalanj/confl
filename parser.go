@@ -14,29 +14,7 @@ func Parse(r io.Reader) (Node, error) {
 	}
 
 	scan := newScanner(src)
-	return parseScanner(scan)
-}
-
-// parseScanner parses a document and returns an AST
-func parseScanner(scan *scanner) (Node, error) {
-	endDelim := eofToken
-	peekedTokens := scan.Peek(1)
-
-	if len(peekedTokens) != 1 {
-		return nil, newParseError("Empty document", scan, &token{})
-	}
-
-	startToken := peekedTokens[0]
-	if startToken.Type == eofToken {
-		return &mapNode{children: []Node{}}, nil
-	}
-
-	if startToken.Type == mapStartToken {
-		endDelim = mapEndToken
-		scan.Token()
-	}
-
-	return parseMap(scan, endDelim, "")
+	return parseMap(scan, eofToken, "")
 }
 
 // parseMap parses a map

@@ -69,27 +69,6 @@ func TestParseScanner(t *testing.T) {
 		},
 
 		{
-			"explicit document map",
-			`{test=23 "also"=this}`,
-			&mapNode{
-				children: []Node{
-					&valueNode{nodeType: WordType, val: "test"},
-					&valueNode{nodeType: NumberType, val: "23"},
-					&valueNode{nodeType: StringType, val: "also"},
-					&valueNode{nodeType: WordType, val: "this"},
-				},
-			},
-			false,
-		},
-
-		{
-			"explicit document map, illegal end token",
-			`{test=23 "also"=this`,
-			nil,
-			true,
-		},
-
-		{
 			"nested map",
 			`map={key=value}`,
 			&mapNode{
@@ -166,7 +145,7 @@ func TestParseScanner(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			scan := newScanner([]byte(test.src))
-			doc, err := parseScanner(scan)
+			doc, err := parseMap(scan, eofToken, "")
 			assert.Equal(t, test.err, err != nil)
 			assert.Equal(t, test.doc, doc)
 		})

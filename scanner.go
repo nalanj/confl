@@ -34,9 +34,6 @@ type scanner struct {
 
 	// lineStart is the offset where the line started
 	lineStart int
-
-	// peeked is the set of peeked tokens
-	peeked []*token
 }
 
 // next returns the next character from the scanner
@@ -77,47 +74,11 @@ func (s *scanner) next() bool {
 
 // newScanner returns a new scanner based on the given source
 func newScanner(src []byte) *scanner {
-	return &scanner{src: src, peeked: []*token{}, line: 1}
+	return &scanner{src: src, line: 1}
 }
 
-// Token returns the peeked token if it's there, or the next token
+// Token returns the next token
 func (s *scanner) Token() *token {
-	var token *token
-
-	if len(s.peeked) > 0 {
-		token = s.peeked[0]
-		s.peeked = s.peeked[1:]
-	}
-
-	if token == nil {
-		token = s.nextToken()
-	}
-
-	return token
-}
-
-// Peek returns up to count tokens, stopping on EOF if one is hit
-func (s *scanner) Peek(count int) []*token {
-	for i := 0; i < count; i++ {
-		var token *token
-
-		if len(s.peeked) > i {
-			token = s.peeked[i]
-		} else {
-			token = s.nextToken()
-			s.peeked = append(s.peeked, token)
-		}
-
-		if token.Type == eofToken {
-			break
-		}
-	}
-
-	return s.peeked[0:count]
-}
-
-// nextToken returns the next token, offset, and string content
-func (s *scanner) nextToken() *token {
 	var token token
 
 	// advance to the first character if at the beginning of the source
