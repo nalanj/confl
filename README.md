@@ -140,7 +140,7 @@ that context without a decorator as well.
 
 ## Errors
 
-Confl tries to do a good job with showing errors. The `Error()` function for n
+Confl tries to do a good job with showing errors. The `Error()` function for a
 `ParseError` simply returns the error message for the error, but there is an
 additional `ErrorWithCode` function that includes information about the line
 and location of the error. For example:
