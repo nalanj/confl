@@ -26,6 +26,25 @@ func TestScan(t *testing.T) {
 			[]string{"12.3", ""},
 		},
 		{
+			"decimal starting with 0",
+			[]byte("0.3"),
+			[]tokenType{numberToken, eofToken},
+			[]string{"0.3", ""},
+		},
+		{
+			"hex number lower case",
+			[]byte("0x3"),
+			[]tokenType{numberToken, eofToken},
+			[]string{"0x3", ""},
+		},
+		{
+			"hex number upper case",
+			[]byte("0X3"),
+			[]tokenType{numberToken, eofToken},
+			[]string{"0X3", ""},
+		},
+
+		{
 			"illegal: two decimal number",
 			[]byte("1.2.3"),
 			[]tokenType{illegalToken},

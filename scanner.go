@@ -202,8 +202,12 @@ func (s *scanner) scanNumber() (tokenType, string) {
 	seenDecimal := false
 
 	for !s.isPunctuation() && !s.isWhitespace() {
+
 		if !s.isDigit() && s.ch != '.' {
-			return illegalToken, string(s.src[startOff:s.nextOffset])
+			// allow 0xN and 0XN for hex
+			if s.offset-startOff != 1 || (s.ch != 'x' && s.ch != 'X') {
+				return illegalToken, string(s.src[startOff:s.nextOffset])
+			}
 		}
 
 		if s.ch == '.' {
