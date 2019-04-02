@@ -159,3 +159,13 @@ Line 1: test=23 "also"=this}
                            ^
 ```
 
+## Getting Involved
+
+Check out
+[CONTRIBUTING.md](https://github.com/nalanj/confl/blob/master/CONTRIBUTING.md)
+for more info on how you can help out.
+
+## License
+
+MIT License. See [LICENSE](https://github.com/nalanj/confl/blob/master/LICENSE)
+for details.
