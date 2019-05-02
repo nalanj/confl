@@ -147,10 +147,6 @@ func TestParseScanner(t *testing.T) {
 			scan := newScanner([]byte(test.src))
 			doc, err := parseMap(scan, eofToken, "")
 			assert.Equal(t, test.err, err != nil)
-
-			if err != nil {
-				fmt.Println(err.(*ParseError).ErrorWithCode())
-			}
 			assert.Equal(t, test.doc, doc)
 		})
 	}
