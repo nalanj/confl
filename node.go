@@ -18,3 +18,8 @@ type Node interface {
 	// Value returns the value of node for value type nodes
 	Value() string
 }
+
+// IsText returns true if the node is a string or word
+func IsText(n Node) bool {
+	return n.Type() == WordType || n.Type() == StringType
+}
