@@ -19,14 +19,14 @@ func TestMapKVPairs(t *testing.T) {
 	assert.Equal(
 		t,
 		KVPairs(m),
-		[][2]Node{
-			[2]Node{
-				&valueNode{nodeType: WordType, val: "key1"},
-				&valueNode{nodeType: WordType, val: "val1"},
+		[]KVPair{
+			KVPair{
+				Key:   &valueNode{nodeType: WordType, val: "key1"},
+				Value: &valueNode{nodeType: WordType, val: "val1"},
 			},
-			[2]Node{
-				&valueNode{nodeType: WordType, val: "key2"},
-				&valueNode{nodeType: WordType, val: "val2"},
+			KVPair{
+				Key:   &valueNode{nodeType: WordType, val: "key2"},
+				Value: &valueNode{nodeType: WordType, val: "val2"},
 			},
 		},
 	)
