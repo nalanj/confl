@@ -3,7 +3,7 @@ executors:
   go:
     docker:
       - image: circleci/golang:1.12
-    working_directory: /go/src
+    working_directory: /src
     environment:
       GO111MODULES: on
       TEST_RESULTS: /tmp/test-results
