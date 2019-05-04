@@ -1,4 +1,5 @@
-[![GoDoc](https://img.shields.io/badge/godoc-reference-5272B4.svg?style=for-the-badge)](https://godoc.org/github.com/nalanj/confl)
+[![GoDoc](https://img.shields.io/badge/godoc-reference-5272B4.svg)](https://godoc.org/github.com/nalanj/confl)
+[![CircleCI](https://circleci.com/gh/nalanj/confl.svg?style=shield)](https://circleci.com/gh/nalanj/confl)
 
 # confl
 
