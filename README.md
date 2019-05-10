@@ -92,7 +92,7 @@ The keys and values are separated by an equal `=` sign. Confl doens't care
 about whitespace outside of strings, so a map may be all on a single line or
 spread across multiple lines. Maps are surrounded by curly `{}` braces.
 
-Map keys must be words or strings.
+Map keys must be words or strings. Maps may not contain duplicate keys.
 
 ```
 map={nested=map}

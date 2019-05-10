@@ -53,10 +53,7 @@ func (p *ParseError) ErrorWithCode() string {
 
 // newParseError returns a new parse error based on the given msg, scanner, and
 // offset
-func newParseError(msg string, scan *scanner, tok *token) *ParseError {
-	offset := tok.Offset
-	length := len(tok.Content)
-
+func newParseError(msg string, scan *scanner, offset, length int) *ParseError {
 	start := scan.lineStart
 	if start < 0 {
 		start = 0

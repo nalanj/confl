@@ -67,7 +67,12 @@ func TestParseScanner(t *testing.T) {
 			nil,
 			true,
 		},
-
+		{
+			"map with duplicate keys",
+			`test=23 test=24`,
+			nil,
+			true,
+		},
 		{
 			"nested map",
 			`map={key=value}`,

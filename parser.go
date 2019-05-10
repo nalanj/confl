@@ -18,17 +18,32 @@ func Parse(r io.Reader) (Node, error) {
 }
 
 // parseMap parses a map
-func parseMap(scan *scanner, endDelim tokenType, decorator string) (*mapNode, error) {
+func parseMap(
+	scan *scanner,
+	endDelim tokenType,
+	decorator string,
+) (*mapNode, error) {
 	aMap := &mapNode{children: []Node{}, decorator: decorator}
+	keys := make(map[string]struct{})
 
 	for {
 		// scan the key
+		keyStart := scan.nextOffset
 		keyNode, keyErr := parseValue(scan, true, endDelim, "")
+		keyEnd := scan.nextOffset
 		if keyErr != nil {
 			return nil, keyErr
 		}
 		if keyNode == nil {
 			return aMap, nil
+		}
+		if _, ok := keys[keyNode.Value()]; ok {
+			return nil, newParseError(
+				fmt.Sprintf("Duplicate key %s", keyNode.Value()),
+				scan,
+				keyStart,
+				keyEnd-keyStart,
+			)
 		}
 
 		// read the delimiter
@@ -37,7 +52,8 @@ func parseMap(scan *scanner, endDelim tokenType, decorator string) (*mapNode, er
 			return nil, newParseError(
 				"Illegal token, expected map delimiter `=`",
 				scan,
-				delimToken,
+				delimToken.Offset,
+				len(delimToken.Content),
 			)
 		}
 
@@ -50,11 +66,13 @@ func parseMap(scan *scanner, endDelim tokenType, decorator string) (*mapNode, er
 			return nil, newParseError(
 				"Illegal token, expected map value, got EOF",
 				scan,
-				&token{Content: "", Offset: len(scan.src)},
+				len(scan.src),
+				0,
 			)
 		}
 
 		aMap.children = append(aMap.children, keyNode, valNode)
+		keys[keyNode.Value()] = struct{}{}
 	}
 }
 
@@ -104,7 +122,10 @@ func parseValue(scan *scanner, mapKey bool, closeType tokenType, decorator strin
 	switch {
 	case token.Type == closeType:
 		return nil, nil
-	case token.Type == mapEndToken || token.Type == listEndToken || token.Type == decoratorEndToken || token.Type == eofToken:
+	case token.Type == mapEndToken ||
+		token.Type == listEndToken ||
+		token.Type == decoratorEndToken ||
+		token.Type == eofToken:
 		return nil, newParseError(
 			fmt.Sprintf(
 				"Illegal closing token: got %s, expected %s",
@@ -112,7 +133,8 @@ func parseValue(scan *scanner, mapKey bool, closeType tokenType, decorator strin
 				closeType,
 			),
 			scan,
-			token,
+			token.Offset,
+			len(token.Content),
 		)
 	case token.Type == wordToken:
 		return &valueNode{
@@ -133,7 +155,8 @@ func parseValue(scan *scanner, mapKey bool, closeType tokenType, decorator strin
 			return nil, newParseError(
 				"Numbers aren't allowed as map keys",
 				scan,
-				token,
+				token.Offset,
+				len(token.Content),
 			)
 		}
 
@@ -147,7 +170,8 @@ func parseValue(scan *scanner, mapKey bool, closeType tokenType, decorator strin
 			return nil, newParseError(
 				"Maps aren't allowed as map keys",
 				scan,
-				token,
+				token.Offset,
+				len(token.Content),
 			)
 		}
 		return parseMap(scan, mapEndToken, decorator)
@@ -156,7 +180,8 @@ func parseValue(scan *scanner, mapKey bool, closeType tokenType, decorator strin
 			return nil, newParseError(
 				"Lists aren't allowed as map keys",
 				scan,
-				token,
+				token.Offset,
+				len(token.Content),
 			)
 		}
 
@@ -165,7 +190,8 @@ func parseValue(scan *scanner, mapKey bool, closeType tokenType, decorator strin
 		return nil, newParseError(
 			"Illegal token",
 			scan,
-			token,
+			token.Offset,
+			len(token.Content),
 		)
 	}
 }
